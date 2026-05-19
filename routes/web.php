@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WargaController;
+use App\Http\Controllers\RTController;
+use App\Http\Controllers\SuratController;
+use App\Http\Controllers\PendataanController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -14,6 +18,26 @@ Route::get('/', function () {
     ]);
 });
 
+
+Route::middleware(['auth', 'role:warga'])->prefix('warga')->group(function () {
+    Route::controller(WargaController::class)->group(function () {
+        Route::get('/', 'index')->name('warga.index');
+    });
+
+    Route::controller(PendataanController::class)->group(function () {
+        Route::get('/data-warga', 'index')->name('data.index');
+    });
+
+    Route::controller(SuratController::class)->group(function () {
+        Route::get('/pengajuan-surat', 'index')->name('surat.index');
+    });
+});
+
+Route::middleware(['auth', 'role:rt'])->controller(RTController::class)->group(function () {
+    Route::get('/rt', 'index')->name('rt.index');
+});
+
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -24,4 +48,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
