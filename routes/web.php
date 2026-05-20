@@ -5,6 +5,7 @@ use App\Http\Controllers\WargaController;
 use App\Http\Controllers\RTController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\PendataanController;
+use App\Http\Controllers\RiwayatPengajuanController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,6 +31,10 @@ Route::middleware(['auth', 'role:warga'])->prefix('warga')->group(function () {
 
     Route::controller(SuratController::class)->group(function () {
         Route::get('/pengajuan-surat', 'index')->name('surat.index');
+    });
+
+    Route::controller(RiwayatPengajuanController::class)->group(function () {
+        Route::get('/riwayat-pengajuan', 'index')->name('riwayat.index');
     });
 });
 

@@ -1,3 +1,4 @@
+import { Link } from "@inertiajs/react";
 import { ReactNode } from "react";
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
     buttonText: string;
     icon: ReactNode;
     color: string; // bg color (ex: bg-green-500)
+    href: string;
 };
 
 export default function StatCard({
@@ -14,6 +16,7 @@ export default function StatCard({
     buttonText,
     icon,
     color,
+    href
 }: Props) {
     return (
         <div className={`${color} text-white p-6 rounded-2xl shadow-md`}>
@@ -29,9 +32,12 @@ export default function StatCard({
                 </div>
             </div>
 
-            <button className="mt-4 w-full bg-white/20 hover:bg-white/30 transition p-2 rounded-lg">
+            <Link
+                href={href}
+                className="mt-4 block w-full text-center bg-white/20 hover:bg-white/30 transition p-2 rounded-lg font-medium"
+            >
                 {buttonText}
-            </button>
+            </Link>
         </div>
     );
 }

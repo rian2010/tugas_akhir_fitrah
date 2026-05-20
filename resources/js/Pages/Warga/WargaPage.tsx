@@ -31,6 +31,7 @@ export default function WargaPage({ auth }: Props) {
                         buttonText="Lihat Data"
                         icon={<User />}
                         color="bg-green-500"
+                        href={route('data.index')}
                     />
 
                     <StatCard
@@ -39,6 +40,7 @@ export default function WargaPage({ auth }: Props) {
                         buttonText="Lihat Status"
                         icon={<FileText />}
                         color="bg-orange-500"
+                        href={route('surat.index')}
                     />
                 </div>
 

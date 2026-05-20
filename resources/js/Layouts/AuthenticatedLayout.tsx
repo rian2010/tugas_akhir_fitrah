@@ -28,10 +28,34 @@ export default function Authenticated({
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
+                                    href={route('warga.index')}
+                                    active={route().current('warga.index')}
                                 >
                                     Dashboard
+                                </NavLink>
+                            </div>
+                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink
+                                    href={route('data.index')}
+                                    active={route().current('data.index')}
+                                >
+                                    Data Warga
+                                </NavLink>
+                            </div>
+                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink
+                                    href={route('surat.index')}
+                                    active={route().current('surat.index')}
+                                >
+                                    Pengajuan Surat
+                                </NavLink>
+                            </div>
+                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink
+                                    href={route('riwayat.index')}
+                                    active={route().current('riwayat.index')}
+                                >
+                                    Riwayat Pengajuan
                                 </NavLink>
                             </div>
                         </div>
