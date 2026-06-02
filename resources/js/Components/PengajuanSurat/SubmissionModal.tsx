@@ -1,10 +1,12 @@
 // components/PengajuanSurat/SubmissionModal.tsx
 import { LetterType } from "@/types/letter.type";
 import { useState, useEffect } from "react";
+import WargaInfoCard from "../WargaInfoCard";
 
 interface SubmissionModalProps {
     isOpen: boolean;
     letterType: LetterType | null;
+    wargaData: any; // Add wargaData prop
     onClose: () => void;
     onSubmit: (data: { purpose: string; additionalInfo: string; notes: string }) => void;
 }
@@ -12,6 +14,7 @@ interface SubmissionModalProps {
 export default function SubmissionModal({
     isOpen,
     letterType,
+    wargaData,
     onClose,
     onSubmit
 }: SubmissionModalProps) {
@@ -38,10 +41,18 @@ export default function SubmissionModal({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Check if warga data exists
+        if (!wargaData) {
+            alert("Data penduduk tidak ditemukan. Silakan lengkapi data diri Anda terlebih dahulu.");
+            return;
+        }
+
         if (!purpose.trim()) {
             alert("Tujuan pengajuan harus diisi");
             return;
         }
+
         setIsSubmitting(true);
         setTimeout(() => {
             onSubmit({ purpose, additionalInfo, notes });
@@ -50,17 +61,14 @@ export default function SubmissionModal({
     };
 
     return (
-        // Outer: fixed overlay, flex-centered, no overflow on this layer
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/50"
                 onClick={onClose}
             />
 
-            {/* Modal: constrained height, scrolls internally */}
-            <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh]">
-                {/* Header — sticky within the modal, not the page */}
+            <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-[90vh]">
+                {/* Header */}
                 <div className="flex-shrink-0 bg-blue-600 px-6 py-5 rounded-t-2xl">
                     <div className="flex items-center justify-between">
                         <div>
@@ -74,7 +82,6 @@ export default function SubmissionModal({
                         <button
                             onClick={onClose}
                             className="p-2 hover:bg-white/10 rounded-lg transition text-white"
-                            aria-label="Tutup modal"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -86,6 +93,14 @@ export default function SubmissionModal({
                 {/* Scrollable body */}
                 <div className="overflow-y-auto flex-1">
                     <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                        {/* Warga Data Card */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Data Pemohon
+                            </label>
+                            <WargaInfoCard warga={wargaData} />
+                        </div>
+
                         {/* Tujuan Pengajuan */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -118,20 +133,6 @@ export default function SubmissionModal({
                             />
                         </div>
 
-                        {/* Catatan */}
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Catatan
-                            </label>
-                            <textarea
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                rows={2}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
-                                placeholder="Catatan khusus (opsional)"
-                            />
-                        </div>
-
                         {/* Informasi Penting */}
                         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                             <h4 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
@@ -141,17 +142,10 @@ export default function SubmissionModal({
                                 Informasi Penting
                             </h4>
                             <ul className="space-y-1 text-sm text-blue-800">
-                                {[
-                                    "Pastikan data penduduk Anda sudah terdaftar",
-                                    "Pengajuan akan diverifikasi oleh Admin RT",
-                                    "Anda akan mendapat notifikasi status pengajuan",
-                                    "Waktu proses tergantung kelengkapan data",
-                                ].map((text) => (
-                                    <li key={text} className="flex items-start gap-2">
-                                        <span>•</span>
-                                        <span>{text}</span>
-                                    </li>
-                                ))}
+                                <li>• Pastikan data penduduk Anda sudah terdaftar dan benar</li>
+                                <li>• Pengajuan akan diverifikasi oleh Admin RT</li>
+                                <li>• Anda akan mendapat notifikasi status pengajuan</li>
+                                <li>• Waktu proses tergantung kelengkapan data</li>
                             </ul>
                         </div>
 
@@ -166,7 +160,7 @@ export default function SubmissionModal({
                             </button>
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || !wargaData}
                                 className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {isSubmitting ? (

@@ -1,56 +1,36 @@
-// pages/riwayat-pengajuan/index.tsx
+// pages/Warga/Riwayat-Pengajuan/RiwayatPage.tsx
 import { useState } from "react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import LetterStatusCard from "@/Components/RiwayatPengajuan/LetterStatusCard";
 import LetterViewerModal from "@/Components/RiwayatPengajuan/LetterViewModal";
 
 export interface PengajuanSurat {
-    id: string;
+    id: string | number;
     nomorPengajuan: string;
     jenisSurat: string;
     keperluan: string;
     tanggalDiajukan: string;
     estimasiSelesai: string;
-    status: "diterima" | "verifikasi" | "proses" | "selesai";
+    status: "diterima" | "verifikasi" | "selesai" | "ditolak";
     pesanAdmin: string;
     fileSurat?: string;
+    // Warga data for letter preview
+    namaLengkap?: string;
+    nik?: string;
+    tempatLahir?: string;
+    tanggalLahir?: string;
+    jenisKelamin?: string;
+    agama?: string;
+    pekerjaan?: string;
+    alamat?: string;
+    rt?: string;
+    rw?: string;
+}
+interface Props {
+    submissions: PengajuanSurat[];
 }
 
-const dummyPengajuan: PengajuanSurat[] = [
-    {
-        id: "1",
-        nomorPengajuan: "001",
-        jenisSurat: "Surat Keterangan Domisili",
-        keperluan: "Melamar pekerjaan",
-        tanggalDiajukan: "15 Des 2024",
-        estimasiSelesai: "18 Des 2024",
-        status: "proses",
-        pesanAdmin: "Surat sedang dalam proses pembuatan oleh admin",
-    },
-    {
-        id: "2",
-        nomorPengajuan: "002",
-        jenisSurat: "Surat Keterangan Usaha",
-        keperluan: "Pengajuan kredit bank",
-        tanggalDiajukan: "10 Des 2024",
-        estimasiSelesai: "17 Des 2024",
-        status: "verifikasi",
-        pesanAdmin: "Data sedang diverifikasi, mohon tunggu",
-    },
-    {
-        id: "3",
-        nomorPengajuan: "003",
-        jenisSurat: "Surat Pengantar SKCK",
-        keperluan: "Melamar pekerjaan",
-        tanggalDiajukan: "5 Des 2024",
-        estimasiSelesai: "8 Des 2024",
-        status: "selesai",
-        pesanAdmin: "Surat sudah selesai dan dapat diambil",
-        fileSurat: "/surat/skck-003.pdf",
-    },
-];
-
-export default function RiwayatPengajuanPage() {
+export default function RiwayatPengajuanPage({ submissions }: Props) {
     const [selectedLetter, setSelectedLetter] = useState<PengajuanSurat | null>(null);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
 
@@ -60,8 +40,18 @@ export default function RiwayatPengajuanPage() {
     };
 
     const handleDownload = (pengajuan: PengajuanSurat) => {
-        console.log("Downloading:", pengajuan);
-        // Implement download logic
+        if (pengajuan.fileSurat) {
+            // If file URL exists, trigger download
+            window.open(pengajuan.fileSurat, '_blank');
+        } else {
+            // Generate PDF from letter data
+            generatePDF(pengajuan);
+        }
+    };
+
+    const generatePDF = async (pengajuan: PengajuanSurat) => {
+        // You can implement PDF generation here
+        // For now, show alert
         alert(`Mengunduh ${pengajuan.jenisSurat}`);
     };
 
@@ -84,14 +74,26 @@ export default function RiwayatPengajuanPage() {
 
                     {/* Letter Status Cards */}
                     <div className="space-y-4">
-                        {dummyPengajuan.map((pengajuan) => (
-                            <LetterStatusCard
-                                key={pengajuan.id}
-                                data={pengajuan}
-                                onViewLetter={handleViewLetter}
-                                onDownload={handleDownload}
-                            />
-                        ))}
+                        {submissions.length === 0 ? (
+                            <div className="bg-white rounded-2xl shadow-md p-8 text-center">
+                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <h3 className="mt-2 text-sm font-medium text-gray-900">Belum ada pengajuan</h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Anda belum mengajukan surat apapun.
+                                </p>
+                            </div>
+                        ) : (
+                            submissions.map((pengajuan) => (
+                                <LetterStatusCard
+                                    key={pengajuan.id}
+                                    data={pengajuan}
+                                    onViewLetter={handleViewLetter}
+                                    onDownload={handleDownload}
+                                />
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

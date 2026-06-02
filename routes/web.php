@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WargaController;
+use App\Http\Controllers\DataWargaController;
 use App\Http\Controllers\RTController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\PendataanController;
 use App\Http\Controllers\RiwayatPengajuanController;
+use App\Http\Controllers\VerifikasiSuratController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,10 +29,13 @@ Route::middleware(['auth', 'role:warga'])->prefix('warga')->group(function () {
 
     Route::controller(PendataanController::class)->group(function () {
         Route::get('/data-warga', 'index')->name('data.index');
+        Route::post('/data-warga/', 'store')->name('warga.store');
+        Route::delete('/data-warga/{warga}', 'destroy')->name('warga.destroy');
     });
 
     Route::controller(SuratController::class)->group(function () {
         Route::get('/pengajuan-surat', 'index')->name('surat.index');
+        Route::post('/pengajuan-surat', 'store')->name('surat.store');
     });
 
     Route::controller(RiwayatPengajuanController::class)->group(function () {
@@ -38,8 +43,21 @@ Route::middleware(['auth', 'role:warga'])->prefix('warga')->group(function () {
     });
 });
 
-Route::middleware(['auth', 'role:rt'])->controller(RTController::class)->group(function () {
-    Route::get('/rt', 'index')->name('rt.index');
+Route::middleware(['auth', 'role:rt'])->prefix('rt')->group(function () {
+    Route::controller(RTController::class)->group(function () {
+        Route::get('/', 'index')->name('rt.index');
+    });
+
+    Route::controller(DataWargaController::class)->group(function () {
+        Route::get('/data-warga', 'index')->name('data-warga.index');
+    });
+
+    Route::controller(VerifikasiSuratController::class)->group(function () {
+        Route::get('/verifikasi-surat', 'index')->name('verifikasi-surat.index');
+        Route::patch('/rt/verifikasi-surat/{id}/status', 'updateStatus')->name('rt.verifikasi-surat.update-status');
+        Route::post('/rt/verifikasi-surat/{id}/approve', 'approve')->name('rt.verifikasi-surat.approve');
+        Route::post('/rt/verifikasi-surat/{id}/reject',  'reject')->name('rt.verifikasi-surat.reject');
+    });
 });
 
 

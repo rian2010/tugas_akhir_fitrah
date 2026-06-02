@@ -1,14 +1,12 @@
 interface LetterTypeCardProps {
     title: string;
     description: string;
-    estimatedTime: string;
     onClick: () => void;
 }
 
 export default function LetterTypeCard({
     title,
     description,
-    estimatedTime,
     onClick
 }: LetterTypeCardProps) {
 
@@ -95,14 +93,6 @@ export default function LetterTypeCard({
                     flex items-center justify-between
                     mt-5 pt-4 border-t border-gray-100
                 ">
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="font-medium">
-                            {estimatedTime}
-                        </span>
-                    </div>
 
                     {/* Arrow */}
                     <div className="

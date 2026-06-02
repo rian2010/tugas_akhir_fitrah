@@ -1,5 +1,4 @@
 // components/RiwayatPengajuan/LetterViewerModal.tsx
-
 import { PengajuanSurat } from "@/Pages/Warga/Riwayat-Pengajuan/RiwayatPage";
 
 interface LetterViewerModalProps {
@@ -54,28 +53,39 @@ export default function LetterViewerModal({ isOpen, onClose, letterData }: Lette
                             {/* Letter Template */}
                             <div className="bg-white border-2 border-gray-200 rounded-xl shadow-lg overflow-hidden">
                                 {/* Kop Surat */}
-                                <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-6 text-center">
-                                    <h1 className="text-2xl font-bold mb-2">PEMERINTAH KABUPATEN</h1>
-                                    <h2 className="text-xl font-semibold mb-1">KECAMATAN SUKAMAJU</h2>
-                                    <h3 className="text-lg font-medium">KELURAHAN MEKARJAYA</h3>
-                                    <div className="border-t border-blue-400 w-1/2 mx-auto mt-3 pt-3">
-                                        <p className="text-sm">Jalan Raya No. 123, Kelurahan Mekarjaya</p>
-                                        <p className="text-sm">Telp. (021) 1234567</p>
+                                <div className="text-center px-8 pt-8 pb-4">
+                                    <h1 className="text-xl font-bold uppercase tracking-wide">
+                                        PERUMAHAN AVIARI GRIYA PRATAMA
+                                    </h1>
+                                    <p className="text-lg font-semibold mt-1">
+                                        RT {letterData.rt || '005'} - RW {letterData.rw || '18'}
+                                    </p>
+                                    <p className="text-md">
+                                        KEL. BULIANG - KEC. BATU AJI
+                                    </p>
+                                    <p className="text-md">
+                                        KOTA BATAM - 29438
+                                    </p>
+                                    <div className="flex justify-center mt-3">
+                                        <div className="w-2/3 border-b-2 border-gray-400"></div>
                                     </div>
                                 </div>
 
                                 {/* Body Surat */}
-                                <div className="p-8">
-                                    <div className="text-center mb-8">
-                                        <h4 className="text-lg font-bold border-b-2 border-gray-300 inline-block pb-2 px-4">
-                                            {letterData.jenisSurat}
+                                <div className="p-8 pt-4">
+                                    <div className="text-center mb-6">
+                                        <h4 className="text-lg font-bold underline underline-offset-4">
+                                            SURAT KETERANGAN
                                         </h4>
+                                        <p className="text-sm mt-1">
+                                            No: / SK-RT.{letterData.rt || '005'} / RW.{letterData.rw || '18'} / P.AGP / {new Date().getFullYear()}
+                                        </p>
                                     </div>
 
                                     <div className="space-y-4 text-gray-700">
                                         <p className="leading-relaxed">
-                                            Yang bertanda tangan di bawah ini, Lurah Mekarjaya, Kecamatan Sukamaju,
-                                            dengan ini menerangkan bahwa:
+                                            Yang bertanda tangan di bawah ini, Ketua RT. {letterData.rt || '005'} / RW. {letterData.rw || '18'} Perumahan Aviari Griya Pratama Kel. Buliang,
+                                            Kec. Batu Aji Kota Batam menerangkan bahwa :
                                         </p>
 
                                         <div className="bg-gray-50 p-4 rounded-lg my-4">
@@ -83,39 +93,39 @@ export default function LetterViewerModal({ isOpen, onClose, letterData }: Lette
                                                 <tbody>
                                                     <tr className="border-b border-gray-200">
                                                         <td className="py-2 font-medium w-1/3">Nama Lengkap</td>
-                                                        <td className="py-2">: Budi Santoso</td>
+                                                        <td className="py-2">: {letterData.namaLengkap || "-"}</td>
                                                     </tr>
                                                     <tr className="border-b border-gray-200">
                                                         <td className="py-2 font-medium">NIK</td>
-                                                        <td className="py-2">: 1234567890123456</td>
+                                                        <td className="py-2">: {letterData.nik || "-"}</td>
                                                     </tr>
                                                     <tr className="border-b border-gray-200">
                                                         <td className="py-2 font-medium">Tempat, Tgl Lahir</td>
-                                                        <td className="py-2">: Jakarta, 15 Mei 1990</td>
+                                                        <td className="py-2">: {letterData.tempatLahir || "-"}, {letterData.tanggalLahir || "-"}</td>
                                                     </tr>
                                                     <tr className="border-b border-gray-200">
                                                         <td className="py-2 font-medium">Jenis Kelamin</td>
-                                                        <td className="py-2">: Laki-laki</td>
+                                                        <td className="py-2">: {letterData.jenisKelamin || "-"}</td>
                                                     </tr>
                                                     <tr className="border-b border-gray-200">
                                                         <td className="py-2 font-medium">Agama</td>
-                                                        <td className="py-2">: Islam</td>
+                                                        <td className="py-2">: {letterData.agama || "-"}</td>
                                                     </tr>
                                                     <tr className="border-b border-gray-200">
                                                         <td className="py-2 font-medium">Pekerjaan</td>
-                                                        <td className="py-2">: Karyawan Swasta</td>
+                                                        <td className="py-2">: {letterData.pekerjaan || "-"}</td>
                                                     </tr>
                                                     <tr>
                                                         <td className="py-2 font-medium">Alamat</td>
-                                                        <td className="py-2">: Jl. Melati No. 10, RT 01/RW 02, Kelurahan Mekarjaya</td>
+                                                        <td className="py-2">: {letterData.alamat || "-"}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </div>
 
                                         <p className="leading-relaxed">
-                                            Bahwa yang bersangkutan benar-benar penduduk Kelurahan Mekarjaya dan
-                                            aktif berdomisili di alamat tersebut.
+                                            Bahwa nama tersebut di atas adalah benar-benar warga RT. {letterData.rt || '005'} / RW. {letterData.rw || '18'} Perumahan Aviari Griya Pratama
+                                            Kel. Buliang, Kec. Batu Aji Kota Batam.
                                         </p>
 
                                         <p className="leading-relaxed">
@@ -132,21 +142,20 @@ export default function LetterViewerModal({ isOpen, onClose, letterData }: Lette
                                     {/* Tanda Tangan */}
                                     <div className="mt-8 pt-8">
                                         <div className="text-right">
-                                            <p>Kelurahan Mekarjaya, {currentDate}</p>
+                                            <p>Batam, {currentDate}</p>
                                             <div className="mt-12">
-                                                <p className="font-bold">Lurah Mekarjaya,</p>
+                                                <p className="font-bold">Ketua RT {letterData.rt || '005'} / RW {letterData.rw || '18'},</p>
                                                 <div className="mt-8">
-                                                    <p className="font-bold underline">Drs. H. Ahmad Fauzi, M.Si</p>
-                                                    <p className="text-sm text-gray-500">NIP. 19651231 199003 1 001</p>
+                                                    <p className="font-bold underline">BAMBANG SUPRIYANTO</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Stamp */}
-                                    <div className="mt-6 flex justify-center">
+                                    <div className="mt-6 flex justify-start">
                                         <div className="w-24 h-24 border-2 border-red-600 rounded-full flex items-center justify-center text-red-600 text-xs font-bold text-center opacity-50">
-                                            STAMPEL<br />DESA
+                                            STAMPEL<br />RT.{letterData.rt || '005'}
                                         </div>
                                     </div>
                                 </div>
@@ -156,8 +165,7 @@ export default function LetterViewerModal({ isOpen, onClose, letterData }: Lette
                             <div className="mt-6 flex justify-center">
                                 <button
                                     onClick={() => {
-                                        // Implement PDF download
-                                        alert("Mengunduh surat...");
+                                        alert("Fitur unduh PDF akan segera tersedia");
                                     }}
                                     className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition shadow-lg"
                                 >

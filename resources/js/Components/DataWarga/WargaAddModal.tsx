@@ -1,8 +1,10 @@
 // components/DataWarga/WargaAddModal.tsx
-import { useState, Fragment } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "@inertiajs/react";
 
 export interface PendudukFormData {
     nama_lengkap: string;
+    // no_kk: string;
     nik: string;
     tanggal_lahir: string;
     jenis_kelamin: "Laki-laki" | "Perempuan";
@@ -15,35 +17,37 @@ export interface PendudukFormData {
     kelurahan: string;
     file_kk: File | null;
     file_ktp: File | null;
+    [key: string]: string | File | null;
 }
 
 type Props = {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: PendudukFormData) => void;
+    authUser: {                 // ← add
+        name: string;
+        email: string;
+        no_kk: string;
+    };
 };
 
 const agamaOptions = [
-    "Islam",
-    "Kristen",
-    "Katolik",
-    "Hindu",
-    "Buddha",
-    "Konghucu",
-    "Lainnya"
+    "Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu", "Lainnya",
 ];
 
 type Step = 1 | 2 | 3;
 
-export default function WargaAddModal({ isOpen, onClose, onSave }: Props) {
+export default function WargaAddModal({ isOpen, onClose, authUser }: Props) {
     const [currentStep, setCurrentStep] = useState<Step>(1);
-    const [formData, setFormData] = useState<PendudukFormData>({
-        nama_lengkap: "",
+    const [clientErrors, setClientErrors] = useState<Partial<Record<keyof PendudukFormData, string>>>({});
+
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm<PendudukFormData>({
+        nama_lengkap: authUser.name,
+        // no_kk: "",
         nik: "",
         tanggal_lahir: "",
         jenis_kelamin: "Laki-laki",
         agama: "Islam",
-        email: "",
+        email: authUser.email,
         nomor_telepon: "",
         alamat_lengkap: "",
         rt: "",
@@ -53,169 +57,156 @@ export default function WargaAddModal({ isOpen, onClose, onSave }: Props) {
         file_ktp: null,
     });
 
-    const [errors, setErrors] = useState<Partial<Record<keyof PendudukFormData, string>>>({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    useEffect(() => {
+        if (isOpen) {
+            setData(prev => ({
+                ...prev,
+                nama_lengkap: authUser.name,
+                email: authUser.email,
+            }));
+        }
+    }, [isOpen]);
+    // Merge client-side errors with server-side Inertia errors
+    const allErrors = { ...clientErrors, ...errors };
 
-    // Validation for each step
+    // ─── Validation ───────────────────────────────────────────────────────────
+
     const validateStep1 = (): boolean => {
         const newErrors: Partial<Record<keyof PendudukFormData, string>> = {};
 
-        if (!formData.nama_lengkap.trim()) {
+        if (!data.nama_lengkap.trim())
             newErrors.nama_lengkap = "Nama lengkap wajib diisi";
-        }
 
-        if (!formData.nik.trim()) {
+        if (!data.nik.trim())
             newErrors.nik = "NIK wajib diisi";
-        } else if (!/^\d{16}$/.test(formData.nik)) {
+        else if (!/^\d{16}$/.test(data.nik))
             newErrors.nik = "NIK harus 16 digit angka";
-        }
 
-        if (!formData.tanggal_lahir) {
+        if (!data.tanggal_lahir)
             newErrors.tanggal_lahir = "Tanggal lahir wajib diisi";
-        }
 
-        if (!formData.email.trim()) {
+        if (!data.email.trim())
             newErrors.email = "Email wajib diisi";
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        else if (!/\S+@\S+\.\S+/.test(data.email))
             newErrors.email = "Format email tidak valid";
-        }
 
-        if (!formData.nomor_telepon.trim()) {
+        if (!data.nomor_telepon.trim())
             newErrors.nomor_telepon = "Nomor telepon wajib diisi";
-        } else if (!/^08\d{8,11}$/.test(formData.nomor_telepon)) {
+        else if (!/^08\d{8,11}$/.test(data.nomor_telepon))
             newErrors.nomor_telepon = "Nomor telepon harus dimulai dengan 08 dan 10-13 digit";
-        }
 
-        setErrors(newErrors);
+        setClientErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const validateStep2 = (): boolean => {
         const newErrors: Partial<Record<keyof PendudukFormData, string>> = {};
 
-        if (!formData.alamat_lengkap.trim()) {
+        if (!data.alamat_lengkap.trim())
             newErrors.alamat_lengkap = "Alamat lengkap wajib diisi";
-        }
 
-        if (!formData.rt.trim()) {
+        if (!data.rt.trim())
             newErrors.rt = "RT wajib diisi";
-        } else if (!/^\d{1,3}$/.test(formData.rt)) {
+        else if (!/^\d{1,3}$/.test(data.rt))
             newErrors.rt = "RT harus 1-3 digit angka";
-        }
 
-        if (!formData.rw.trim()) {
+        if (!data.rw.trim())
             newErrors.rw = "RW wajib diisi";
-        } else if (!/^\d{1,3}$/.test(formData.rw)) {
+        else if (!/^\d{1,3}$/.test(data.rw))
             newErrors.rw = "RW harus 1-3 digit angka";
-        }
 
-        if (!formData.kelurahan.trim()) {
+        if (!data.kelurahan.trim())
             newErrors.kelurahan = "Kelurahan wajib diisi";
-        }
 
-        setErrors(newErrors);
+        setClientErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const validateStep3 = (): boolean => {
         const newErrors: Partial<Record<keyof PendudukFormData, string>> = {};
 
-        if (!formData.file_kk) {
+        if (!data.file_kk)
             newErrors.file_kk = "File Kartu Keluarga wajib diunggah";
-        }
-
-        if (!formData.file_ktp) {
+        if (!data.file_ktp)
             newErrors.file_ktp = "File KTP wajib diunggah";
-        }
 
-        setErrors(newErrors);
+        setClientErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
+    // ─── Navigation ──────────────────────────────────────────────────────────
+
     const handleNext = () => {
-        if (currentStep === 1 && validateStep1()) {
-            setCurrentStep(2);
-        } else if (currentStep === 2 && validateStep2()) {
-            setCurrentStep(3);
-        }
+        if (currentStep === 1 && validateStep1()) setCurrentStep(2);
+        else if (currentStep === 2 && validateStep2()) setCurrentStep(3);
     };
 
     const handlePrevious = () => {
         if (currentStep > 1) {
             setCurrentStep((prev) => (prev - 1) as Step);
-            // Clear errors when going back
-            setErrors({});
+            setClientErrors({});
         }
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        // Clear error for this field
-        if (errors[name as keyof PendudukFormData]) {
-            setErrors(prev => ({ ...prev, [name]: undefined }));
-        }
-    };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'file_kk' | 'file_ktp') => {
-        const file = e.target.files?.[0] || null;
-
-        // Validate file size (max 5MB)
-        if (file && file.size > 5 * 1024 * 1024) {
-            setErrors(prev => ({ ...prev, [field]: "Ukuran file maksimal 5MB" }));
-            return;
-        }
-
-        // Validate file type
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-        if (file && !allowedTypes.includes(file.type)) {
-            setErrors(prev => ({ ...prev, [field]: "File harus berupa PDF, JPG, atau PNG" }));
-            return;
-        }
-
-        setFormData(prev => ({ ...prev, [field]: file }));
-        if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: undefined }));
-        }
-    };
-
-    const handleSubmit = async () => {
-        if (!validateStep3()) {
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        // Simulate API call
-        setTimeout(() => {
-            onSave(formData);
-            setIsSubmitting(false);
-            handleClose();
-        }, 1000);
     };
 
     const handleClose = () => {
-        setFormData({
-            nama_lengkap: "",
-            nik: "",
-            tanggal_lahir: "",
-            jenis_kelamin: "Laki-laki",
-            agama: "Islam",
-            email: "",
-            nomor_telepon: "",
-            alamat_lengkap: "",
-            rt: "",
-            rw: "",
-            kelurahan: "",
-            file_kk: null,
-            file_ktp: null,
-        });
-        setErrors({});
+        reset();
+        clearErrors();
+        setClientErrors({});
         setCurrentStep(1);
         onClose();
     };
 
+    // ─── Input Handlers ──────────────────────────────────────────────────────
+
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    ) => {
+        const { name, value } = e.target;
+        setData(name as keyof PendudukFormData, value);
+        // Clear client error for this field on change
+        if (clientErrors[name as keyof PendudukFormData]) {
+            setClientErrors((prev) => ({ ...prev, [name]: undefined }));
+        }
+    };
+
+    const handleFileChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        field: "file_kk" | "file_ktp"
+    ) => {
+        const file = e.target.files?.[0] || null;
+
+        if (file && file.size > 5 * 1024 * 1024) {
+            setClientErrors((prev) => ({ ...prev, [field]: "Ukuran file maksimal 5MB" }));
+            return;
+        }
+
+        const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
+        if (file && !allowedTypes.includes(file.type)) {
+            setClientErrors((prev) => ({
+                ...prev,
+                [field]: "File harus berupa PDF, JPG, atau PNG",
+            }));
+            return;
+        }
+
+        setData(field, file);
+        setClientErrors((prev) => ({ ...prev, [field]: undefined }));
+    };
+
+    // ─── Submit ───────────────────────────────────────────────────────────────
+
+    const handleSubmit = () => {
+        if (!validateStep3()) return;
+
+        post(route("warga.store"), {
+            forceFormData: true, // required for file uploads
+            onSuccess: () => handleClose(),
+        });
+    };
+
     if (!isOpen) return null;
+
+    // ─── Render ───────────────────────────────────────────────────────────────
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -228,7 +219,8 @@ export default function WargaAddModal({ isOpen, onClose, onSave }: Props) {
             {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
                 <div className="relative bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    {/* Progress Steps */}
+
+                    {/* ── Header + Step Bar ── */}
                     <div className="sticky top-0 bg-white border-b border-gray-200 px-6 pt-6 pb-4 z-10">
                         <div className="flex items-center justify-between mb-4">
                             <div>
@@ -250,336 +242,257 @@ export default function WargaAddModal({ isOpen, onClose, onSave }: Props) {
                             </button>
                         </div>
 
-                        {/* Step Indicators */}
+                        {/* Step indicators */}
                         <div className="flex gap-2">
                             {[1, 2, 3].map((step) => (
                                 <div
                                     key={step}
-                                    className={`flex-1 h-2 rounded-full transition-all ${step === currentStep
-                                            ? "bg-blue-600"
-                                            : step < currentStep
-                                                ? "bg-green-500"
-                                                : "bg-gray-200"
+                                    className={`flex-1 h-2 rounded-full transition-all duration-300 ${step === currentStep
+                                        ? "bg-blue-600"
+                                        : step < currentStep
+                                            ? "bg-green-500"
+                                            : "bg-gray-200"
                                         }`}
                                 />
                             ))}
                         </div>
                     </div>
 
-                    {/* Form Content */}
+                    {/* ── Form Body ── */}
                     <div className="px-6 py-6">
-                        {/* Step 1: Personal Information */}
+
+                        {/* ── Step 1: Informasi Pribadi ── */}
                         {currentStep === 1 && (
                             <div className="space-y-6">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <span className="text-blue-600 font-semibold text-sm">1</span>
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-gray-900">
-                                        Informasi Pribadi
-                                    </h3>
-                                </div>
+                                <StepHeading step={1} title="Informasi Pribadi" />
 
                                 <div className="grid md:grid-cols-2 gap-5">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Nama Lengkap <span className="text-red-500">*</span>
-                                        </label>
+                                    <Field label="Nama Lengkap" error={allErrors.nama_lengkap} required>
                                         <input
                                             type="text"
                                             name="nama_lengkap"
-                                            value={formData.nama_lengkap}
+                                            value={data.nama_lengkap}
+                                            readOnly
                                             onChange={handleInputChange}
-                                            className={`w-full px-3 py-2 border ${errors.nama_lengkap ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition`}
+                                            className={inputClass(allErrors.nama_lengkap)}
                                             placeholder="Masukkan nama lengkap"
                                         />
-                                        {errors.nama_lengkap && (
-                                            <p className="mt-1 text-xs text-red-500">{errors.nama_lengkap}</p>
-                                        )}
-                                    </div>
+                                    </Field>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            NIK <span className="text-red-500">*</span>
-                                        </label>
+                                    <Field label="NO KK" error={allErrors.no_kk} required>
+                                        <input
+                                            type="text"
+                                            name="no_kk"
+                                            value={authUser.no_kk}
+                                            readOnly
+                                            onChange={handleInputChange}
+                                            maxLength={16}
+                                            className={`${inputClass(allErrors.no_kk)} font-mono`}
+                                            placeholder="16 digit angka"
+                                        />
+                                    </Field>
+
+                                    <Field label="NIK" error={allErrors.nik} required>
                                         <input
                                             type="text"
                                             name="nik"
-                                            value={formData.nik}
+                                            value={data.nik}
                                             onChange={handleInputChange}
                                             maxLength={16}
-                                            className={`w-full px-3 py-2 border ${errors.nik ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition font-mono`}
+                                            className={`${inputClass(allErrors.nik)} font-mono`}
                                             placeholder="16 digit angka"
                                         />
-                                        {errors.nik && (
-                                            <p className="mt-1 text-xs text-red-500">{errors.nik}</p>
-                                        )}
-                                    </div>
+                                    </Field>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Tanggal Lahir <span className="text-red-500">*</span>
-                                        </label>
+                                    <Field label="Tanggal Lahir" error={allErrors.tanggal_lahir} required>
                                         <input
                                             type="date"
                                             name="tanggal_lahir"
-                                            value={formData.tanggal_lahir}
+                                            value={data.tanggal_lahir}
                                             onChange={handleInputChange}
-                                            className={`w-full px-3 py-2 border ${errors.tanggal_lahir ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition`}
+                                            className={inputClass(allErrors.tanggal_lahir)}
                                         />
-                                        {errors.tanggal_lahir && (
-                                            <p className="mt-1 text-xs text-red-500">{errors.tanggal_lahir}</p>
-                                        )}
-                                    </div>
+                                    </Field>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Jenis Kelamin <span className="text-red-500">*</span>
-                                        </label>
+                                    <Field label="Jenis Kelamin" required>
                                         <div className="flex gap-4 mt-2">
-                                            <label className="flex items-center gap-2">
-                                                <input
-                                                    type="radio"
-                                                    name="jenis_kelamin"
-                                                    value="Laki-laki"
-                                                    checked={formData.jenis_kelamin === "Laki-laki"}
-                                                    onChange={handleInputChange}
-                                                    className="text-blue-600"
-                                                />
-                                                <span className="text-sm">Laki-laki</span>
-                                            </label>
-                                            <label className="flex items-center gap-2">
-                                                <input
-                                                    type="radio"
-                                                    name="jenis_kelamin"
-                                                    value="Perempuan"
-                                                    checked={formData.jenis_kelamin === "Perempuan"}
-                                                    onChange={handleInputChange}
-                                                    className="text-blue-600"
-                                                />
-                                                <span className="text-sm">Perempuan</span>
-                                            </label>
+                                            {["Laki-laki", "Perempuan"].map((jk) => (
+                                                <label key={jk} className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="jenis_kelamin"
+                                                        value={jk}
+                                                        checked={data.jenis_kelamin === jk}
+                                                        onChange={handleInputChange}
+                                                        className="text-blue-600"
+                                                    />
+                                                    <span className="text-sm">{jk}</span>
+                                                </label>
+                                            ))}
                                         </div>
-                                    </div>
+                                    </Field>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Agama <span className="text-red-500">*</span>
-                                        </label>
+                                    <Field label="Agama" required>
                                         <select
                                             name="agama"
-                                            value={formData.agama}
+                                            value={data.agama}
                                             onChange={handleInputChange}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                                            className={inputClass()}
                                         >
-                                            {agamaOptions.map(agama => (
-                                                <option key={agama} value={agama}>{agama}</option>
+                                            {agamaOptions.map((a) => (
+                                                <option key={a} value={a}>{a}</option>
                                             ))}
                                         </select>
-                                    </div>
+                                    </Field>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Email <span className="text-red-500">*</span>
-                                        </label>
+                                    <Field label="Email" error={allErrors.email} required>
                                         <input
                                             type="email"
                                             name="email"
-                                            value={formData.email}
+                                            value={data.email}
+                                            readOnly
                                             onChange={handleInputChange}
-                                            className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition`}
+                                            className={inputClass(allErrors.email)}
                                             placeholder="nama@email.com"
                                         />
-                                        {errors.email && (
-                                            <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-                                        )}
-                                    </div>
+                                    </Field>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Nomor Telepon <span className="text-red-500">*</span>
-                                        </label>
+                                    <Field label="Nomor Telepon" error={allErrors.nomor_telepon} required>
                                         <input
                                             type="tel"
                                             name="nomor_telepon"
-                                            value={formData.nomor_telepon}
+                                            value={data.nomor_telepon}
                                             onChange={handleInputChange}
-                                            className={`w-full px-3 py-2 border ${errors.nomor_telepon ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition`}
+                                            className={inputClass(allErrors.nomor_telepon)}
                                             placeholder="08xxxxxxxxxx"
                                         />
-                                        {errors.nomor_telepon && (
-                                            <p className="mt-1 text-xs text-red-500">{errors.nomor_telepon}</p>
-                                        )}
-                                    </div>
+                                    </Field>
                                 </div>
                             </div>
                         )}
 
-                        {/* Step 2: Address Information */}
+                        {/* ── Step 2: Informasi Alamat ── */}
                         {currentStep === 2 && (
                             <div className="space-y-6">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <span className="text-blue-600 font-semibold text-sm">2</span>
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-gray-900">
-                                        Informasi Alamat
-                                    </h3>
-                                </div>
+                                <StepHeading step={2} title="Informasi Alamat" />
 
                                 <div className="space-y-5">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Alamat Lengkap <span className="text-red-500">*</span>
-                                        </label>
+                                    <Field label="Alamat Lengkap" error={allErrors.alamat_lengkap} required>
                                         <textarea
                                             name="alamat_lengkap"
-                                            value={formData.alamat_lengkap}
+                                            value={data.alamat_lengkap}
                                             onChange={handleInputChange}
                                             rows={3}
-                                            className={`w-full px-3 py-2 border ${errors.alamat_lengkap ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition`}
+                                            className={inputClass(allErrors.alamat_lengkap)}
                                             placeholder="Jalan, nomor rumah, dll"
                                         />
-                                        {errors.alamat_lengkap && (
-                                            <p className="mt-1 text-xs text-red-500">{errors.alamat_lengkap}</p>
-                                        )}
-                                    </div>
+                                    </Field>
 
                                     <div className="grid md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                RT <span className="text-red-500">*</span>
-                                            </label>
+                                        <Field label="RT" error={allErrors.rt} required>
                                             <input
                                                 type="text"
                                                 name="rt"
-                                                value={formData.rt}
+                                                value={data.rt}
                                                 onChange={handleInputChange}
-                                                className={`w-full px-3 py-2 border ${errors.rt ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition`}
+                                                className={inputClass(allErrors.rt)}
                                                 placeholder="01"
                                             />
-                                            {errors.rt && (
-                                                <p className="mt-1 text-xs text-red-500">{errors.rt}</p>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                RW <span className="text-red-500">*</span>
-                                            </label>
+                                        </Field>
+
+                                        <Field label="RW" error={allErrors.rw} required>
                                             <input
                                                 type="text"
                                                 name="rw"
-                                                value={formData.rw}
+                                                value={data.rw}
                                                 onChange={handleInputChange}
-                                                className={`w-full px-3 py-2 border ${errors.rw ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition`}
+                                                className={inputClass(allErrors.rw)}
                                                 placeholder="02"
                                             />
-                                            {errors.rw && (
-                                                <p className="mt-1 text-xs text-red-500">{errors.rw}</p>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Kelurahan <span className="text-red-500">*</span>
-                                            </label>
+                                        </Field>
+
+                                        <Field label="Kelurahan" error={allErrors.kelurahan} required>
                                             <input
                                                 type="text"
                                                 name="kelurahan"
-                                                value={formData.kelurahan}
+                                                value={data.kelurahan}
                                                 onChange={handleInputChange}
-                                                className={`w-full px-3 py-2 border ${errors.kelurahan ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition`}
+                                                className={inputClass(allErrors.kelurahan)}
                                                 placeholder="Kelurahan"
                                             />
-                                            {errors.kelurahan && (
-                                                <p className="mt-1 text-xs text-red-500">{errors.kelurahan}</p>
-                                            )}
-                                        </div>
+                                        </Field>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* Step 3: Documents */}
+                        {/* ── Step 3: Unggah Dokumen ── */}
                         {currentStep === 3 && (
                             <div className="space-y-6">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <span className="text-blue-600 font-semibold text-sm">3</span>
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-gray-900">
-                                        Unggah Dokumen
-                                    </h3>
-                                </div>
+                                <StepHeading step={3} title="Unggah Dokumen" />
 
                                 <div className="space-y-5">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Kartu Keluarga (KK) <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="flex items-center gap-2">
-                                            <label className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed ${errors.file_kk ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-blue-500'} rounded-lg cursor-pointer transition`}>
-                                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                                </svg>
-                                                <span className="text-sm text-gray-600">
-                                                    {formData.file_kk ? formData.file_kk.name : "Upload KK (PDF/JPG/PNG)"}
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    accept=".pdf,.jpg,.jpeg,.png"
-                                                    onChange={(e) => handleFileChange(e, 'file_kk')}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                        </div>
-                                        {errors.file_kk && (
-                                            <p className="mt-1 text-xs text-red-500">{errors.file_kk}</p>
-                                        )}
-                                        <p className="mt-1 text-xs text-gray-500">Maksimal 5MB</p>
-                                    </div>
+                                    <FileUploadField
+                                        label="Kartu Keluarga (KK)"
+                                        field="file_kk"
+                                        file={data.file_kk}
+                                        error={allErrors.file_kk}
+                                        onChange={handleFileChange}
+                                    />
+                                    <FileUploadField
+                                        label="KTP"
+                                        field="file_ktp"
+                                        file={data.file_ktp}
+                                        error={allErrors.file_ktp}
+                                        onChange={handleFileChange}
+                                    />
+                                </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            KTP <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="flex items-center gap-2">
-                                            <label className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed ${errors.file_ktp ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-blue-500'} rounded-lg cursor-pointer transition`}>
-                                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                                </svg>
-                                                <span className="text-sm text-gray-600">
-                                                    {formData.file_ktp ? formData.file_ktp.name : "Upload KTP (PDF/JPG/PNG)"}
-                                                </span>
-                                                <input
-                                                    type="file"
-                                                    accept=".pdf,.jpg,.jpeg,.png"
-                                                    onChange={(e) => handleFileChange(e, 'file_ktp')}
-                                                    className="hidden"
-                                                />
-                                            </label>
-                                        </div>
-                                        {errors.file_ktp && (
-                                            <p className="mt-1 text-xs text-red-500">{errors.file_ktp}</p>
-                                        )}
-                                        <p className="mt-1 text-xs text-gray-500">Maksimal 5MB</p>
+                                {/* Summary */}
+                                <div className="mt-6 bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Ringkasan Data:</h4>
+                                    <div className="space-y-1.5 text-sm text-gray-600">
+                                        <SummaryRow
+                                            label="Nama"
+                                            value={data.nama_lengkap}
+                                            ok={!!data.nama_lengkap}
+                                        />
+                                        <SummaryRow
+                                            label="NIK"
+                                            value={data.nik}
+                                            ok={!!data.nik}
+                                        />
+                                        <SummaryRow
+                                            label="Alamat"
+                                            value={data.alamat_lengkap ? "Sudah diisi" : ""}
+                                            ok={!!data.alamat_lengkap}
+                                        />
+                                        <SummaryRow
+                                            label="Dokumen"
+                                            value={data.file_kk && data.file_ktp ? "KK & KTP lengkap" : "Belum lengkap"}
+                                            ok={!!(data.file_kk && data.file_ktp)}
+                                        />
                                     </div>
                                 </div>
 
-                                {/* Summary of completed steps */}
-                                <div className="mt-6 bg-gray-50 rounded-lg p-4">
-                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Ringkasan:</h4>
-                                    <div className="space-y-1 text-sm text-gray-600">
-                                        <p>✓ {formData.nama_lengkap || "Nama belum diisi"}</p>
-                                        <p>✓ NIK: {formData.nik || "Belum diisi"}</p>
-                                        <p>✓ Alamat: {formData.alamat_lengkap ? "Sudah diisi" : "Belum diisi"}</p>
-                                        <p>✓ Dokumen: {formData.file_kk && formData.file_ktp ? "Lengkap" : "Belum lengkap"}</p>
+                                {/* Show server-side errors on step 3 if any */}
+                                {Object.keys(errors).length > 0 && (
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                        <p className="text-sm font-semibold text-red-700 mb-2">
+                                            Terdapat kesalahan:
+                                        </p>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {Object.entries(errors).map(([key, msg]) => (
+                                                <li key={key} className="text-sm text-red-600">{msg}</li>
+                                            ))}
+                                        </ul>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         )}
                     </div>
 
-                    {/* Footer with Navigation Buttons */}
+                    {/* ── Footer ── */}
                     <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-between gap-3">
                         <button
                             type="button"
@@ -604,14 +517,14 @@ export default function WargaAddModal({ isOpen, onClose, onSave }: Props) {
                             <button
                                 type="button"
                                 onClick={handleSubmit}
-                                disabled={isSubmitting}
+                                disabled={processing}
                                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
-                                {isSubmitting ? (
+                                {processing ? (
                                     <>
                                         <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                         </svg>
                                         Menyimpan...
                                     </>
@@ -621,8 +534,116 @@ export default function WargaAddModal({ isOpen, onClose, onSave }: Props) {
                             </button>
                         )}
                     </div>
+
                 </div>
             </div>
         </div>
     );
+}
+
+// ─── Helper Components ────────────────────────────────────────────────────────
+
+function StepHeading({ step, title }: { step: number; title: string }) {
+    return (
+        <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 font-semibold text-sm">{step}</span>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        </div>
+    );
+}
+
+function Field({
+    label,
+    error,
+    required,
+    children,
+}: {
+    label: string;
+    error?: string;
+    required?: boolean;
+    children: React.ReactNode;
+}) {
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+                {label} {required && <span className="text-red-500">*</span>}
+            </label>
+            {children}
+            {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+        </div>
+    );
+}
+
+function FileUploadField({
+    label,
+    field,
+    file,
+    error,
+    onChange,
+}: {
+    label: string;
+    field: "file_kk" | "file_ktp";
+    file: File | null;
+    error?: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>, field: "file_kk" | "file_ktp") => void;
+}) {
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+                {label} <span className="text-red-500">*</span>
+            </label>
+            <label
+                className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition ${error
+                    ? "border-red-400 bg-red-50"
+                    : file
+                        ? "border-green-400 bg-green-50"
+                        : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"
+                    }`}
+            >
+                {file ? (
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                ) : (
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                )}
+                <span className={`text-sm ${file ? "text-green-700 font-medium" : "text-gray-500"}`}>
+                    {file ? file.name : `Upload ${label} (PDF/JPG/PNG)`}
+                </span>
+                <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => onChange(e, field)}
+                    className="hidden"
+                />
+            </label>
+            {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+            <p className="mt-1 text-xs text-gray-400">Maksimal 5MB</p>
+        </div>
+    );
+}
+
+function SummaryRow({ label, value, ok }: { label: string; value: string; ok: boolean }) {
+    return (
+        <div className="flex items-center gap-2">
+            <span className={`text-base ${ok ? "text-green-500" : "text-gray-300"}`}>
+                {ok ? "✓" : "○"}
+            </span>
+            <span className="font-medium text-gray-600 w-20">{label}:</span>
+            <span className={ok ? "text-gray-800" : "text-gray-400 italic"}>
+                {value || "Belum diisi"}
+            </span>
+        </div>
+    );
+}
+
+// ─── Utility ──────────────────────────────────────────────────────────────────
+
+function inputClass(error?: string) {
+    return `w-full px-3 py-2 border ${error ? "border-red-400 bg-red-50" : "border-gray-300"
+        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm`;
 }

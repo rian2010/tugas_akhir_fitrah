@@ -41,24 +41,11 @@ export function Toolbar({
                 value={filterStatus}
                 onChange={onFilterStatus}
             >
-                <option value="">Semua Status</option>
+                <option value="">Semua</option>
                 <option value="Tetap">Tetap</option>
                 <option value="Sementara">Sementara</option>
             </select>
 
-            {/* RW Filter */}
-            <select
-                className="rounded-lg border border-gray-200 bg-white py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                value={filterRW}
-                onChange={onFilterRW}
-            >
-                <option value="">Semua RW</option>
-                {rwList.map((rw) => (
-                    <option key={rw} value={rw}>
-                        RW {rw}
-                    </option>
-                ))}
-            </select>
         </div>
     );
 }

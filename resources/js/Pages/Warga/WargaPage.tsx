@@ -5,7 +5,6 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { User, FileText } from "lucide-react";
 import Header from "@/Components/Header";
 import StatCard from "@/Components/StatCard";
-import QuickActions from "@/Components/QuickAction";
 import ActivityList from "@/Components/ActivityFeed";
 
 type Props = {
@@ -44,7 +43,6 @@ export default function WargaPage({ auth }: Props) {
                     />
                 </div>
 
-                <QuickActions />
                 <ActivityList />
             </div>
         </AuthenticatedLayout>

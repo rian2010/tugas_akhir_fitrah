@@ -3,7 +3,6 @@ export interface LetterType {
     id: string;
     title: string;
     description: string;
-    estimatedTime: string;
     icon?: React.ReactNode;
 }
 

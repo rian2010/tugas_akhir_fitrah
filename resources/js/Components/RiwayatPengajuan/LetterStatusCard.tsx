@@ -1,5 +1,4 @@
 // components/RiwayatPengajuan/LetterStatusCard.tsx
-
 import { PengajuanSurat } from "@/Pages/Warga/Riwayat-Pengajuan/RiwayatPage";
 
 interface LetterStatusCardProps {
@@ -25,7 +24,7 @@ export default function LetterStatusCard({ data, onViewLetter, onDownload }: Let
                 };
             case "verifikasi":
                 return {
-                    label: "Verifikasi Data",
+                    label: "Disetujui & Diproses",
                     color: "text-yellow-600",
                     bgColor: "bg-yellow-100",
                     icon: (
@@ -34,18 +33,6 @@ export default function LetterStatusCard({ data, onViewLetter, onDownload }: Let
                         </svg>
                     ),
                     step: 2,
-                };
-            case "proses":
-                return {
-                    label: "Proses Pembuatan",
-                    color: "text-purple-600",
-                    bgColor: "bg-purple-100",
-                    icon: (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    ),
-                    step: 3,
                 };
             case "selesai":
                 return {
@@ -57,7 +44,19 @@ export default function LetterStatusCard({ data, onViewLetter, onDownload }: Let
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                     ),
-                    step: 4,
+                    step: 3,
+                };
+            case "ditolak":
+                return {
+                    label: "Ditolak",
+                    color: "text-red-600",
+                    bgColor: "bg-red-100",
+                    icon: (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    ),
+                    step: 0,
                 };
             default:
                 return {
@@ -73,6 +72,15 @@ export default function LetterStatusCard({ data, onViewLetter, onDownload }: Let
     const statusConfig = getStatusConfig();
     const currentStep = statusConfig.step;
     const isSelesai = data.status === "selesai";
+    const isDitolak = data.status === "ditolak";
+    const totalSteps = 3; // Total steps: diterima (1), verifikasi (2), selesai (3)
+
+    // Steps configuration
+    const steps = [
+        { label: "Pengajuan Diterima", step: 1 },
+        { label: "Disetujui & Diproses", step: 2 },
+        { label: "Selesai", step: 3 },
+    ];
 
     return (
         <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
@@ -80,7 +88,7 @@ export default function LetterStatusCard({ data, onViewLetter, onDownload }: Let
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                     <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <h2 className="text-lg font-semibold text-gray-900">
                                 {data.jenisSurat}
                             </h2>
@@ -103,77 +111,83 @@ export default function LetterStatusCard({ data, onViewLetter, onDownload }: Let
                     </div>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="mb-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">
-                            Progress Pengajuan
-                        </span>
-                        <span className="text-sm text-gray-500">
-                            Estimasi selesai: {data.estimasiSelesai}
-                        </span>
-                    </div>
-                    <div className="relative">
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full transition-all duration-500"
-                                style={{ width: `${(currentStep / 4) * 100}%` }}
-                            />
+                {/* Progress Bar - Only show if not rejected */}
+                {!isDitolak && (
+                    <div className="mb-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-700">
+                                Progress Pengajuan
+                            </span>
+                            <span className="text-sm text-gray-500">
+                                Estimasi selesai: {data.estimasiSelesai}
+                            </span>
                         </div>
-                    </div>
-                </div>
-
-                {/* Steps */}
-                <div className="grid grid-cols-4 gap-2 mb-6">
-                    {[
-                        { label: "Pengajuan Diterima", step: 1 },
-                        { label: "Verifikasi Data", step: 2 },
-                        { label: "Proses Pembuatan", step: 3 },
-                        { label: "Selesai", step: 4 },
-                    ].map((step) => (
-                        <div key={step.step} className="text-center">
-                            <div className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center mb-2 transition-all ${step.step <= currentStep
-                                ? "bg-green-500 text-white"
-                                : "bg-gray-200 text-gray-400"
-                                }`}>
-                                {step.step < currentStep ? (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                ) : (
-                                    <span className="text-xs font-medium">{step.step}</span>
-                                )}
+                        <div className="relative">
+                            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full transition-all duration-500"
+                                    style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                                />
                             </div>
-                            <p className={`text-xs font-medium ${step.step <= currentStep ? "text-gray-700" : "text-gray-400"
-                                }`}>
-                                {step.label.split(" ")[0]}
-                            </p>
                         </div>
-                    ))}
-                </div>
+                    </div>
+                )}
+
+                {/* Steps - Only show if not rejected */}
+                {!isDitolak && (
+                    <div className="grid grid-cols-3 gap-2 mb-6">
+                        {steps.map((step) => (
+                            <div key={step.step} className="text-center">
+                                <div className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center mb-2 transition-all ${step.step <= currentStep
+                                        ? "bg-green-500 text-white"
+                                        : "bg-gray-200 text-gray-400"
+                                    }`}>
+                                    {step.step < currentStep ? (
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    ) : (
+                                        <span className="text-xs font-medium">{step.step}</span>
+                                    )}
+                                </div>
+                                <p className={`text-xs font-medium ${step.step <= currentStep ? "text-gray-700" : "text-gray-400"
+                                    }`}>
+                                    {step.label}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Pesan Admin */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                <div className={`rounded-xl p-4 mb-4 ${isDitolak
+                        ? "bg-red-50 border border-red-200"
+                        : "bg-blue-50 border border-blue-200"
+                    }`}>
                     <div className="flex items-start gap-3">
                         <div className="flex-shrink-0">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isDitolak ? "bg-red-100" : "bg-blue-100"
+                                }`}>
+                                <svg className={`w-4 h-4 ${isDitolak ? "text-red-600" : "text-blue-600"
+                                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                 </svg>
                             </div>
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-blue-900 mb-1">
+                            <p className={`text-sm font-semibold mb-1 ${isDitolak ? "text-red-900" : "text-blue-900"
+                                }`}>
                                 Pesan dari Admin RT
                             </p>
-                            <p className="text-sm text-blue-800">
+                            <p className={`text-sm ${isDitolak ? "text-red-800" : "text-blue-800"
+                                }`}>
                                 {data.pesanAdmin}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Action Buttons - Only show if selesai (completed) */}
                 {isSelesai && (
                     <div className="flex gap-3">
                         <button
@@ -194,6 +208,21 @@ export default function LetterStatusCard({ data, onViewLetter, onDownload }: Let
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                             Unduh Surat
+                        </button>
+                    </div>
+                )}
+
+                {/* Rejected Message */}
+                {isDitolak && (
+                    <div className="mt-2 text-center">
+                        <button
+                            onClick={() => window.location.href = route('surat.index')}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Ajukan Surat Baru
                         </button>
                     </div>
                 )}
