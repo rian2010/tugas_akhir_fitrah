@@ -272,7 +272,6 @@ export default function WargaAddModal({ isOpen, onClose, authUser }: Props) {
                                             type="text"
                                             name="nama_lengkap"
                                             value={data.nama_lengkap}
-                                            readOnly
                                             onChange={handleInputChange}
                                             className={inputClass(allErrors.nama_lengkap)}
                                             placeholder="Masukkan nama lengkap"
@@ -350,7 +349,6 @@ export default function WargaAddModal({ isOpen, onClose, authUser }: Props) {
                                             type="email"
                                             name="email"
                                             value={data.email}
-                                            readOnly
                                             onChange={handleInputChange}
                                             className={inputClass(allErrors.email)}
                                             placeholder="nama@email.com"

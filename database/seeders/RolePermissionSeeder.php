@@ -31,7 +31,8 @@ class RolePermissionSeeder extends Seeder
         $rt->givePermissionTo(Permission::all());
 
         $warga->givePermissionTo([
-            'view data'
+            'view data',
+            'edit data'
         ]);
     }
 }

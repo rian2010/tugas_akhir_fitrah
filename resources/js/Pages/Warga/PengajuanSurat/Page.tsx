@@ -9,17 +9,19 @@ import { LetterType } from '@/types/letter.type';
 type Props = {
     letterTypes: LetterType[];
     authUser: any;
-    warga: any; // Add warga prop
+    wargas: any; // Add warga prop
 };
 
-export default function Page({ letterTypes, authUser, warga }: Props) {
+export default function Page({ letterTypes, authUser, wargas }: Props) {
+    const [selectedWarga, setSelectedWarga] = useState<any>(
+        wargas.length > 0 ? wargas[0] : null // default to first
+    );
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedLetter, setSelectedLetter] = useState<LetterType | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleCardClick = (letterType: LetterType) => {
-        // Check if warga data exists before allowing submission
-        if (!warga) {
+        if (!selectedWarga) { // fix: was checking 'warga' which doesn't exist here
             alert('Data penduduk tidak ditemukan. Silakan lengkapi data diri Anda terlebih dahulu.');
             return;
         }
@@ -36,7 +38,8 @@ export default function Page({ letterTypes, authUser, warga }: Props) {
             letter_type_id: selectedLetter.id,
             purpose: data.purpose,
             additional_info: data.additionalInfo,
-            notes: data.notes
+            notes: data.notes,
+            warga_id: selectedWarga.id,
         }, {
             preserveScroll: true,
             onSuccess: () => {
@@ -94,15 +97,13 @@ export default function Page({ letterTypes, authUser, warga }: Props) {
                 </div>
             </div>
 
-            {/* Submission Modal */}
             <SubmissionModal
                 isOpen={isModalOpen}
                 letterType={selectedLetter}
-                wargaData={warga}
-                onClose={() => {
-                    setIsModalOpen(false);
-                    setSelectedLetter(null);
-                }}
+                wargaData={selectedWarga}
+                wargas={wargas}                  // add this
+                onSelectWarga={setSelectedWarga} // add this
+                onClose={() => { setIsModalOpen(false); setSelectedLetter(null); }}
                 onSubmit={handleSubmit}
             />
         </Authenticated>

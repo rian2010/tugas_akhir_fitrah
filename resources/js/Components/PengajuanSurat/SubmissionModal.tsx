@@ -7,6 +7,8 @@ interface SubmissionModalProps {
     isOpen: boolean;
     letterType: LetterType | null;
     wargaData: any; // Add wargaData prop
+    wargas: any[];                              // add
+    onSelectWarga: (warga: any) => void;
     onClose: () => void;
     onSubmit: (data: { purpose: string; additionalInfo: string; notes: string }) => void;
 }
@@ -15,6 +17,8 @@ export default function SubmissionModal({
     isOpen,
     letterType,
     wargaData,
+    wargas,
+    onSelectWarga,
     onClose,
     onSubmit
 }: SubmissionModalProps) {
@@ -75,9 +79,6 @@ export default function SubmissionModal({
                             <h2 className="text-xl font-bold text-white">
                                 {letterType.title}
                             </h2>
-                            <p className="text-blue-100 text-sm mt-1">
-                                Estimasi pengerjaan: {letterType.estimatedTime}
-                            </p>
                         </div>
                         <button
                             onClick={onClose}
@@ -98,7 +99,11 @@ export default function SubmissionModal({
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Data Pemohon
                             </label>
-                            <WargaInfoCard warga={wargaData} />
+                            <WargaInfoCard
+                                warga={wargaData}
+                                wargas={wargas}              // add
+                                onSelectWarga={onSelectWarga} // add
+                            />
                         </div>
 
                         {/* Tujuan Pengajuan */}

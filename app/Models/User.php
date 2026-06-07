@@ -54,4 +54,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Warga::class, 'no_kk', 'no_kk');
     }
+
+    public function warga()
+    {
+        return $this->hasOne(Warga::class);
+    }
 }

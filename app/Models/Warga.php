@@ -8,6 +8,7 @@ use App\Models\User;
 class Warga extends Model
 {
     protected $fillable = [
+        'user_id',
         'nama_lengkap',
         'no_kk',
         'nik',

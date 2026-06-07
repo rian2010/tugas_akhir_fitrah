@@ -52,6 +52,8 @@ class PendataanController extends Controller
             ]
         );
 
+        $validated['user_id'] = Auth::id();
+
         $validated['no_kk']   = Auth::user()->no_kk;
         $validated['file_kk']  = $request->file('file_kk')->store('dokumen/kk', 'public');
         $validated['file_ktp'] = $request->file('file_ktp')->store('dokumen/ktp', 'public');

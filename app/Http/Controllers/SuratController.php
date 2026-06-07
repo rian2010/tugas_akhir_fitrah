@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Surat;
 use App\Models\Warga;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -13,7 +14,9 @@ class SuratController extends Controller
     public function index()
     {
         // Get current user's warga data
-        $warga = Warga::where('id', Auth::id())->first();
+        $wargas = Warga::where('user_id', Auth::id())->get();
+
+
 
         // Letter types configuration
         $letterTypes = [
@@ -47,10 +50,11 @@ class SuratController extends Controller
             ],
         ];
 
+
         return Inertia::render('Warga/PengajuanSurat/Page', [
             'letterTypes' => $letterTypes,
             'authUser' => Auth::user(),
-            'warga' => $warga // Pass warga data to frontend
+            'wargas' => $wargas // Pass warga data to frontend
         ]);
     }
 
@@ -63,7 +67,7 @@ class SuratController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $warga = Warga::where('id', Auth::id())->first();
+        $warga = Warga::where('user_id', Auth::id())->first();
 
         if (!$warga) {
             return response()->json([
@@ -95,7 +99,7 @@ class SuratController extends Controller
             ]
         ]);
 
-  return redirect()->back()->with('success', 'Pengajuan surat berhasil dikirim!');
+        return redirect()->back()->with('success', 'Pengajuan surat berhasil dikirim!');
     }
     public function history()
     {
@@ -107,4 +111,3 @@ class SuratController extends Controller
         return response()->json($submissions);
     }
 }
-
