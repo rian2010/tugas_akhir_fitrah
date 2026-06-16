@@ -4,6 +4,7 @@ import PendudukCard from "@/Components/DataWarga/WargaCard";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import WargaDetailModal, { PendudukDetail } from "@/Components/DataWarga/DetailModal";
 import WargaAddModal from "@/Components/DataWarga/WargaAddModal";
+import WargaEditModal from "@/Components/DataWarga/WargaEditModal"; // Import the edit modal
 
 type AuthUser = {
     nama_lengkap: string;
@@ -20,6 +21,7 @@ export default function Page({ warga, authUser }: Props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedWarga, setSelectedWarga] = useState<PendudukDetail | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const handleView = (data: PendudukDetail) => {
         setSelectedWarga(data);
@@ -27,8 +29,13 @@ export default function Page({ warga, authUser }: Props) {
     };
 
     const handleEdit = (data: PendudukDetail) => {
-        console.log("Edit:", data);
-        // TODO: implement edit modal
+        setSelectedWarga(data);
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditSuccess = () => {
+        // Refresh the page or update local state
+        router.reload({ only: ['warga'] });
     };
 
     const handleDelete = (id: number) => {
@@ -36,7 +43,16 @@ export default function Page({ warga, authUser }: Props) {
 
         router.delete(route("warga.destroy", id), {
             preserveScroll: true,
+            onSuccess: () => {
+                // Optional: Show success message
+                router.reload({ only: ['warga'] });
+            },
         });
+    };
+
+    const handleAddSuccess = () => {
+        // Refresh the page after adding new warga
+        router.reload({ only: ['warga'] });
     };
 
     return (
@@ -117,7 +133,21 @@ export default function Page({ warga, authUser }: Props) {
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 authUser={authUser}
+                onSuccess={handleAddSuccess}
             />
+
+            {/* Edit Modal - Only render if selectedWarga exists */}
+            {selectedWarga && (
+                <WargaEditModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => {
+                        setIsEditModalOpen(false);
+                        setSelectedWarga(null);
+                    }}
+                    wargaData={selectedWarga}
+                    authUser={authUser}
+                />
+            )}
         </Authenticated>
     );
 }

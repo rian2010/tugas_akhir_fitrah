@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\Warga;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PendataanController extends Controller
 {
@@ -61,6 +62,106 @@ class PendataanController extends Controller
         Warga::create($validated);
 
         return redirect()->back()->with('success', 'Data warga berhasil disimpan.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $warga = Warga::findOrFail($id);
+
+        // Validate the request
+        $validated = $request->validate([
+            'nama_lengkap' => 'required|string|max:255',
+            'nik' => 'required|string|size:16|unique:wargas,nik,' . $id,
+            'tanggal_lahir' => 'required|date',
+            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+            'agama' => 'required|string|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Lainnya',
+            'email' => 'required|email|unique:wargas,email,' . $id . '|unique:users,email,' . ($warga->user_id ?? 0),
+            'nomor_telepon' => 'required|string|regex:/^08[0-9]{8,11}$/',
+            'alamat_lengkap' => 'required|string',
+            'rt' => 'required|string|max:3',
+            'rw' => 'required|string|max:3',
+            'kelurahan' => 'required|string|max:255',
+            'file_kk' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'file_ktp' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'remove_kk' => 'nullable|in:true,false',
+            'remove_ktp' => 'nullable|in:true,false',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Handle KK file upload/removal
+            if ($request->hasFile('file_kk')) {
+                // Delete old file if exists
+                if ($warga->file_kk && Storage::disk('public')->exists($warga->file_kk)) {
+                    Storage::disk('public')->delete($warga->file_kk);
+                }
+                // Store new file
+                $kkPath = $request->file('file_kk')->store('dokumen/kk', 'public');
+                $warga->file_kk = $kkPath;
+            } elseif ($request->input('remove_kk') === 'true') {
+                // Remove file without replacing
+                if ($warga->file_kk && Storage::disk('public')->exists($warga->file_kk)) {
+                    Storage::disk('public')->delete($warga->file_kk);
+                }
+                $warga->file_kk = null;
+            }
+
+            // Handle KTP file upload/removal
+            if ($request->hasFile('file_ktp')) {
+                // Delete old file if exists
+                if ($warga->file_ktp && Storage::disk('public')->exists($warga->file_ktp)) {
+                    Storage::disk('public')->delete($warga->file_ktp);
+                }
+                // Store new file
+                $ktpPath = $request->file('file_ktp')->store('dokumen/ktp', 'public');
+                $warga->file_ktp = $ktpPath;
+            } elseif ($request->input('remove_ktp') === 'true') {
+                // Remove file without replacing
+                if ($warga->file_ktp && Storage::disk('public')->exists($warga->file_ktp)) {
+                    Storage::disk('public')->delete($warga->file_ktp);
+                }
+                $warga->file_ktp = null;
+            }
+
+            // Update warga data
+            $warga->nama_lengkap = $validated['nama_lengkap'];
+            $warga->nik = $validated['nik'];
+            $warga->tanggal_lahir = $validated['tanggal_lahir'];
+            $warga->jenis_kelamin = $validated['jenis_kelamin'];
+            $warga->agama = $validated['agama'];
+            $warga->email = $validated['email'];
+            $warga->nomor_telepon = $validated['nomor_telepon'];
+            $warga->alamat_lengkap = $validated['alamat_lengkap'];
+            $warga->rt = $validated['rt'];
+            $warga->rw = $validated['rw'];
+            $warga->kelurahan = $validated['kelurahan'];
+            $warga->save();
+
+            // Update associated user if exists
+            if ($warga->user) {
+                $warga->user->update([
+                    'name' => $validated['nama_lengkap'],
+                    'email' => $validated['email'],
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Data warga berhasil diupdate');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Delete newly uploaded files if something went wrong
+            if (isset($kkPath) && Storage::disk('public')->exists($kkPath)) {
+                Storage::disk('public')->delete($kkPath);
+            }
+            if (isset($ktpPath) && Storage::disk('public')->exists($ktpPath)) {
+                Storage::disk('public')->delete($ktpPath);
+            }
+
+            return redirect()->back()->with('error', 'Gagal mengupdate data warga: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Warga $warga)

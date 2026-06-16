@@ -30,6 +30,7 @@ Route::middleware(['auth', 'role:warga'])->prefix('warga')->group(function () {
     Route::controller(PendataanController::class)->group(function () {
         Route::get('/data-warga', 'index')->name('data.index');
         Route::post('/data-warga/', 'store')->name('warga.store');
+        Route::put('/data-warga/{id}', 'update')->name('warga.update');
         Route::delete('/data-warga/{warga}', 'destroy')->name('warga.destroy');
     });
 

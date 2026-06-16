@@ -1,4 +1,5 @@
 // components/RiwayatPengajuan/LetterViewerModal.tsx
+import { useRef, useState } from "react";
 import { PengajuanSurat } from "@/Pages/Warga/Riwayat-Pengajuan/RiwayatPage";
 
 interface LetterViewerModalProps {
@@ -7,7 +8,172 @@ interface LetterViewerModalProps {
     letterData: PengajuanSurat | null;
 }
 
+function LetterContent({ letterData, currentDate, showTableBox = false }: { letterData: PengajuanSurat; currentDate: string; showTableBox?: boolean }) {
+    const rt = letterData.rt || "005";
+    const rw = letterData.rw || "18";
+    const year = new Date().getFullYear();
+
+    const row = (label: string, value: string) => (
+        <tr key={label} style={{ border: "none" }}>
+            <td style={{
+                padding: "4px 8px 4px 0",
+                width: "38%",
+                verticalAlign: "top",
+                fontSize: 13,
+                border: "none"
+            }}>
+                {label}
+            </td>
+            <td style={{
+                padding: "4px 0",
+                fontSize: 13,
+                verticalAlign: "top",
+                border: "none"
+            }}>
+                : {value || "—"}
+            </td>
+        </tr>
+    );
+
+    return (
+        <div style={{
+            background: "#fff",
+            fontFamily: "'Times New Roman', Times, serif",
+            color: "#1a1a1a",
+            padding: "40px 48px",
+            width: "100%",
+            boxSizing: "border-box",
+        }}>
+            {/* Kop Surat */}
+            <div style={{ textAlign: "center", marginBottom: 4 }}>
+                <div style={{ fontSize: 17, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
+                    PERUMAHAN AVIARI GRIYA PRATAMA
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 600, marginTop: 2 }}>
+                    RT {rt} – RW {rw}
+                </div>
+                <div style={{ fontSize: 14, marginTop: 1 }}>KEL. BULIANG – KEC. BATU AJI</div>
+                <div style={{ fontSize: 14 }}>KOTA BATAM – 29438</div>
+                <div style={{ borderBottom: "2.5px solid #555", margin: "10px auto 0", width: "70%" }} />
+            </div>
+
+            {/* Judul */}
+            <div style={{ textAlign: "center", margin: "18px 0 20px" }}>
+                <div style={{ fontSize: 15, fontWeight: 700, textDecoration: "underline", letterSpacing: 1 }}>
+                    SURAT KETERANGAN
+                </div>
+                <div style={{ fontSize: 12, marginTop: 4, color: "#444" }}>
+                    No: &nbsp;/&nbsp;SK-RT.{rt}&nbsp;/&nbsp;RW.{rw}&nbsp;/&nbsp;P.AGP&nbsp;/&nbsp;{year}
+                </div>
+            </div>
+
+            {/* Paragraf pembuka */}
+            <p style={{ fontSize: 13.5, lineHeight: 1.8, marginBottom: 14, textAlign: "justify" }}>
+                Yang bertanda tangan di bawah ini, Ketua RT. {rt} / RW. {rw} Perumahan Aviari Griya Pratama
+                Kel. Buliang, Kec. Batu Aji Kota Batam menerangkan bahwa :
+            </p>
+
+            {/* Tabel data - conditional styling based on showTableBox */}
+            <div style={{
+                marginBottom: 16,
+                ...(showTableBox ? {
+                    background: "#f9fafb",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 6,
+                    padding: "12px 16px",
+                } : {
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                }),
+            }}>
+                <table style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    border: "none",
+                }}>
+                    <tbody>
+                        {row("Nama Lengkap", letterData.namaLengkap)}
+                        {row("NIK", letterData.nik)}
+                        {row("Tempat, Tgl Lahir", `${letterData.tempatLahir || "—"}, ${letterData.tanggalLahir || "—"}`)}
+                        {row("Jenis Kelamin", letterData.jenisKelamin)}
+                        {row("Agama", letterData.agama)}
+                        {row("Pekerjaan", letterData.pekerjaan)}
+                        <tr style={{ border: "none" }}>
+                            <td style={{
+                                padding: "4px 8px 4px 0",
+                                width: "38%",
+                                verticalAlign: "top",
+                                fontSize: 13,
+                                border: "none"
+                            }}>
+                                Alamat
+                            </td>
+                            <td style={{
+                                padding: "4px 0",
+                                fontSize: 13,
+                                verticalAlign: "top",
+                                border: "none"
+                            }}>
+                                : {letterData.alamat || "—"}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Paragraf isi */}
+            <p style={{ fontSize: 13.5, lineHeight: 1.8, marginBottom: 14, textAlign: "justify" }}>
+                Bahwa nama tersebut di atas adalah benar-benar warga RT. {rt} / RW. {rw} Perumahan Aviari Griya
+                Pratama Kel. Buliang, Kec. Batu Aji Kota Batam.
+            </p>
+            <p style={{ fontSize: 13.5, lineHeight: 1.8, marginBottom: 14, textAlign: "justify" }}>
+                Surat keterangan ini dibuat untuk memenuhi keperluan{" "}
+                <strong>{letterData.keperluan}</strong>.
+            </p>
+            <p style={{ fontSize: 13.5, lineHeight: 1.8, marginBottom: 28, textAlign: "justify" }}>
+                Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
+            </p>
+
+            {/* Tanda tangan + cap */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: 8 }}>
+                {/* Cap / Stempel (kiri) */}
+                <div style={{
+                    width: 90, height: 90,
+                    border: "2.5px solid #dc2626",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#dc2626",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    textAlign: "center",
+                    lineHeight: 1.4,
+                    opacity: 0.55,
+                    flexShrink: 0,
+                }}>
+                    STAMPEL<br />RT.{rt}
+                </div>
+
+                {/* TTD (kanan) */}
+                <div style={{ textAlign: "right", fontSize: 13.5 }}>
+                    <div>Batam, {currentDate}</div>
+                    <div style={{ marginTop: 4 }}>Ketua RT {rt} / RW {rw},</div>
+                    <div style={{ marginTop: 64, fontWeight: 700, textDecoration: "underline" }}>
+                        BAMBANG SUPRIYANTO
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─── Main Modal ──────────────────────────────────────────────────────────────
 export default function LetterViewerModal({ isOpen, onClose, letterData }: LetterViewerModalProps) {
+    const printTargetRef = useRef<HTMLDivElement>(null);
+    const [isDownloading, setIsDownloading] = useState(false);
+
     if (!isOpen || !letterData) return null;
 
     const currentDate = new Date().toLocaleDateString("id-ID", {
@@ -16,169 +182,154 @@ export default function LetterViewerModal({ isOpen, onClose, letterData }: Lette
         year: "numeric",
     });
 
+    const handleDownloadPDF = async () => {
+        if (!printTargetRef.current) return;
+        setIsDownloading(true);
+
+        try {
+            const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+                import("jspdf"),
+                import("html2canvas"),
+            ]);
+
+            const el = printTargetRef.current;
+            el.style.visibility = "visible";
+            el.style.position = "fixed";
+            el.style.top = "0";
+            el.style.left = "0";
+            el.style.zIndex = "9999";
+
+            const canvas = await html2canvas(el, {
+                scale: 2.5,
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                logging: false,
+            });
+
+            el.style.visibility = "hidden";
+            el.style.position = "absolute";
+            el.style.top = "-9999px";
+            el.style.left = "-9999px";
+            el.style.zIndex = "";
+
+            const imgData = canvas.toDataURL("image/png");
+
+            const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+            const pageW = pdf.internal.pageSize.getWidth();
+            const pageH = pdf.internal.pageSize.getHeight();
+
+            const imgW = pageW;
+            const imgH = (canvas.height * pageW) / canvas.width;
+
+            let yOffset = 0;
+            while (yOffset < imgH) {
+                if (yOffset > 0) pdf.addPage();
+                pdf.addImage(imgData, "PNG", 0, -yOffset, imgW, imgH);
+                yOffset += pageH;
+            }
+
+            const safeName = `Surat_${(letterData.jenisSurat || "Keterangan").replace(/\s+/g, "_")}_${letterData.nomorPengajuan}.pdf`;
+            pdf.save(safeName);
+        } catch (err) {
+            console.error("PDF generation failed:", err);
+            alert("Gagal mengunduh surat. Silakan coba lagi.");
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            {/* Backdrop */}
+        <>
+            {/* Hidden off-screen render target - NO table box for PDF */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-                onClick={onClose}
-            />
+                ref={printTargetRef}
+                style={{
+                    position: "absolute",
+                    top: -9999,
+                    left: -9999,
+                    visibility: "hidden",
+                    width: 794,
+                    background: "#fff",
+                    zIndex: -1,
+                }}
+            >
+                {/* showTableBox={false} ensures PDF has no grid/background */}
+                <LetterContent letterData={letterData} currentDate={currentDate} showTableBox={false} />
+            </div>
 
-            {/* Modal */}
-            <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    {/* Header */}
-                    <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-900">
-                                {letterData.jenisSurat}
-                            </h2>
-                            <p className="text-sm text-gray-500">
-                                No. Pengajuan: {letterData.nomorPengajuan}
-                            </p>
-                        </div>
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition"
-                        >
-                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+            {/* Visible modal - WITH table box for preview */}
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+                    onClick={onClose}
+                />
 
-                    {/* Letter Content */}
-                    <div className="p-8">
-                        <div className="max-w-2xl mx-auto">
-                            {/* Letter Template */}
-                            <div className="bg-white border-2 border-gray-200 rounded-xl shadow-lg overflow-hidden">
-                                {/* Kop Surat */}
-                                <div className="text-center px-8 pt-8 pb-4">
-                                    <h1 className="text-xl font-bold uppercase tracking-wide">
-                                        PERUMAHAN AVIARI GRIYA PRATAMA
-                                    </h1>
-                                    <p className="text-lg font-semibold mt-1">
-                                        RT {letterData.rt || '005'} - RW {letterData.rw || '18'}
-                                    </p>
-                                    <p className="text-md">
-                                        KEL. BULIANG - KEC. BATU AJI
-                                    </p>
-                                    <p className="text-md">
-                                        KOTA BATAM - 29438
-                                    </p>
-                                    <div className="flex justify-center mt-3">
-                                        <div className="w-2/3 border-b-2 border-gray-400"></div>
-                                    </div>
-                                </div>
+                <div className="flex min-h-full items-center justify-center p-4">
+                    <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col">
 
-                                {/* Body Surat */}
-                                <div className="p-8 pt-4">
-                                    <div className="text-center mb-6">
-                                        <h4 className="text-lg font-bold underline underline-offset-4">
-                                            SURAT KETERANGAN
-                                        </h4>
-                                        <p className="text-sm mt-1">
-                                            No: / SK-RT.{letterData.rt || '005'} / RW.{letterData.rw || '18'} / P.AGP / {new Date().getFullYear()}
-                                        </p>
-                                    </div>
-
-                                    <div className="space-y-4 text-gray-700">
-                                        <p className="leading-relaxed">
-                                            Yang bertanda tangan di bawah ini, Ketua RT. {letterData.rt || '005'} / RW. {letterData.rw || '18'} Perumahan Aviari Griya Pratama Kel. Buliang,
-                                            Kec. Batu Aji Kota Batam menerangkan bahwa :
-                                        </p>
-
-                                        <div className="bg-gray-50 p-4 rounded-lg my-4">
-                                            <table className="w-full text-sm">
-                                                <tbody>
-                                                    <tr className="border-b border-gray-200">
-                                                        <td className="py-2 font-medium w-1/3">Nama Lengkap</td>
-                                                        <td className="py-2">: {letterData.namaLengkap || "-"}</td>
-                                                    </tr>
-                                                    <tr className="border-b border-gray-200">
-                                                        <td className="py-2 font-medium">NIK</td>
-                                                        <td className="py-2">: {letterData.nik || "-"}</td>
-                                                    </tr>
-                                                    <tr className="border-b border-gray-200">
-                                                        <td className="py-2 font-medium">Tempat, Tgl Lahir</td>
-                                                        <td className="py-2">: {letterData.tempatLahir || "-"}, {letterData.tanggalLahir || "-"}</td>
-                                                    </tr>
-                                                    <tr className="border-b border-gray-200">
-                                                        <td className="py-2 font-medium">Jenis Kelamin</td>
-                                                        <td className="py-2">: {letterData.jenisKelamin || "-"}</td>
-                                                    </tr>
-                                                    <tr className="border-b border-gray-200">
-                                                        <td className="py-2 font-medium">Agama</td>
-                                                        <td className="py-2">: {letterData.agama || "-"}</td>
-                                                    </tr>
-                                                    <tr className="border-b border-gray-200">
-                                                        <td className="py-2 font-medium">Pekerjaan</td>
-                                                        <td className="py-2">: {letterData.pekerjaan || "-"}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="py-2 font-medium">Alamat</td>
-                                                        <td className="py-2">: {letterData.alamat || "-"}</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        <p className="leading-relaxed">
-                                            Bahwa nama tersebut di atas adalah benar-benar warga RT. {letterData.rt || '005'} / RW. {letterData.rw || '18'} Perumahan Aviari Griya Pratama
-                                            Kel. Buliang, Kec. Batu Aji Kota Batam.
-                                        </p>
-
-                                        <p className="leading-relaxed">
-                                            Surat keterangan ini dibuat untuk memenuhi keperluan{" "}
-                                            <span className="font-semibold">{letterData.keperluan}</span>.
-                                        </p>
-
-                                        <p className="leading-relaxed">
-                                            Demikian surat keterangan ini dibuat dengan sebenarnya untuk
-                                            dapat dipergunakan sebagaimana mestinya.
-                                        </p>
-                                    </div>
-
-                                    {/* Tanda Tangan */}
-                                    <div className="mt-8 pt-8">
-                                        <div className="text-right">
-                                            <p>Batam, {currentDate}</p>
-                                            <div className="mt-12">
-                                                <p className="font-bold">Ketua RT {letterData.rt || '005'} / RW {letterData.rw || '18'},</p>
-                                                <div className="mt-8">
-                                                    <p className="font-bold underline">BAMBANG SUPRIYANTO</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Stamp */}
-                                    <div className="mt-6 flex justify-start">
-                                        <div className="w-24 h-24 border-2 border-red-600 rounded-full flex items-center justify-center text-red-600 text-xs font-bold text-center opacity-50">
-                                            STAMPEL<br />RT.{letterData.rt || '005'}
-                                        </div>
-                                    </div>
-                                </div>
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-900">{letterData.jenisSurat}</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">No. Pengajuan: {letterData.nomorPengajuan}</p>
                             </div>
+                            <button
+                                onClick={onClose}
+                                className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-400 hover:text-gray-600"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
 
-                            {/* Download Button */}
-                            <div className="mt-6 flex justify-center">
+                        {/* Preview - WITH table box */}
+                        <div className="overflow-y-auto flex-1 bg-gray-50 px-6 py-6">
+                            <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                                <LetterContent letterData={letterData} currentDate={currentDate} showTableBox={true} />
+                            </div>
+                        </div>
+
+                        {/* Footer actions */}
+                        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-3 bg-white rounded-b-2xl">
+                            <p className="text-xs text-gray-400">
+                                Pratinjau surat · dokumen resmi RT {letterData.rt || "005"} / RW {letterData.rw || "18"}
+                            </p>
+                            <div className="flex gap-2">
                                 <button
-                                    onClick={() => {
-                                        alert("Fitur unduh PDF akan segera tersedia");
-                                    }}
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition shadow-lg"
+                                    onClick={onClose}
+                                    className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition font-medium"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    Unduh Surat (PDF)
+                                    Tutup
+                                </button>
+                                <button
+                                    onClick={handleDownloadPDF}
+                                    disabled={isDownloading}
+                                    className="inline-flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition shadow"
+                                >
+                                    {isDownloading ? (
+                                        <>
+                                            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                            </svg>
+                                            Menyiapkan…
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                            </svg>
+                                            Unduh PDF
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

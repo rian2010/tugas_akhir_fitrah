@@ -25,3 +25,35 @@ export interface StatCard {
     buttonLabel: string;
     onClick?: () => void;
 }
+
+// types/index.ts
+export type Activity = {
+    id: string;
+    type: 'warga' | 'surat';
+    title: string;
+    description: string;
+    created_at: string;
+    created_at_formatted: string;
+    status?: 'pending' | 'approved' | 'rejected' | 'completed';
+};
+
+export type DashboardStats = {
+    pendingSuratCount: number;
+    hasWargaData: boolean;
+};
+
+export type User = {
+    id: number;
+    name: string;
+    email: string;
+    role?: string;
+};
+
+export type PageProps = {
+    auth: {
+        user: User;
+    };
+    activities: Activity[];
+    stats: DashboardStats;
+    error?: string;
+};
