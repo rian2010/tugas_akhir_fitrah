@@ -35,16 +35,16 @@ class SuratController extends Controller
                 'type' => 'usaha'
             ],
             [
-                'id' => 'skck',
-                'title' => 'Surat Pengantar SKCK',
-                'description' => 'Surat pengantar untuk pembuatan Surat Keterangan Catatan Kepolisian',
+                'id' => 'sktm',
+                'title' => 'Surat Keterangan Tidak Mampu',
+                'description' => 'Surat pengantar untuk menyatakan kondisi ekonomi warga',
                 'estimatedTime' => '1 Hari Kerja',
-                'type' => 'skck'
+                'type' => 'sktm'
             ],
             [
-                'id' => 'keluarga',
-                'title' => 'Surat Keterangan Keluarga',
-                'description' => 'Surat keterangan tentang susunan anggota keluarga',
+                'id' => 'nikah',
+                'title' => 'Surat Pengantar Nikah',
+                'description' => 'Surat pengantar untuk administrasi pernikahan',
                 'estimatedTime' => '1-2 Hari Kerja',
                 'type' => 'keluarga'
             ],

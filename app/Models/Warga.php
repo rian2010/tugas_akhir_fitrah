@@ -16,6 +16,8 @@ class Warga extends Model
         'jenis_kelamin',
         'agama',
         'email',
+        'status_keluarga',
+        'status_kepemilikan',
         'nomor_telepon',
         'alamat_lengkap',
         'rt',
@@ -29,4 +31,16 @@ class Warga extends Model
     {
         return $this->belongsTo(User::class, 'no_kk', 'no_kk');
     }
+
+    public const STATUS_KELUARGA = [
+        'kepala keluarga' => 'Kepala Keluarga',
+        'istri' => 'Istri',
+        'anak' => 'Anak',
+    ];
+
+    public const STATUS_KEPEMILIKAN = [
+        'milik sendiri' => 'Milik Sendiri',
+        'kontrak' => 'Kontrak',
+        'numpang' => 'Numpang',
+    ];
 }

@@ -5,6 +5,8 @@ export interface Anggota {
     nik: string;
     tanggal_lahir: string;
     jenis_kelamin: "Laki-laki" | "Perempuan";
+    status_keluarga: "kepala_keluarga" | "istri" | "anak";
+    status_kepemilikan: "sewa" | "milik_sendiri";
     agama: string;
     email: string;
     nomor_telepon: string;

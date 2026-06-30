@@ -4,11 +4,12 @@ import { useForm } from "@inertiajs/react";
 
 export interface PendudukFormData {
     nama_lengkap: string;
-    // no_kk: string;
     nik: string;
     tanggal_lahir: string;
     jenis_kelamin: "Laki-laki" | "Perempuan";
     agama: string;
+    status_keluarga: "kepala_keluarga" | "istri" | "anak";
+    status_kepemilikan: "sewa" | "milik_sendiri";
     email: string;
     nomor_telepon: string;
     alamat_lengkap: string;
@@ -41,13 +42,14 @@ export default function WargaAddModal({ isOpen, onClose, authUser }: Props) {
     const [clientErrors, setClientErrors] = useState<Partial<Record<keyof PendudukFormData, string>>>({});
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm<PendudukFormData>({
-        nama_lengkap: authUser.name,
-        // no_kk: "",
+        nama_lengkap: "",
         nik: "",
         tanggal_lahir: "",
         jenis_kelamin: "Laki-laki",
         agama: "Islam",
-        email: authUser.email,
+        status_keluarga: "kepala_keluarga",
+        status_kepemilikan: "sewa",
+        email: "",
         nomor_telepon: "",
         alamat_lengkap: "",
         rt: "",
@@ -85,6 +87,12 @@ export default function WargaAddModal({ isOpen, onClose, authUser }: Props) {
         if (!data.tanggal_lahir)
             newErrors.tanggal_lahir = "Tanggal lahir wajib diisi";
 
+        if (!data.status_keluarga)
+            newErrors.status_keluarga = "Status keluarga wajib dipilih";
+
+        if (!data.status_kepemilikan)
+            newErrors.status_kepemilikan = "Status kepemilikan wajib dipilih";
+
         if (!data.email.trim())
             newErrors.email = "Email wajib diisi";
         else if (!/\S+@\S+\.\S+/.test(data.email))
@@ -98,7 +106,6 @@ export default function WargaAddModal({ isOpen, onClose, authUser }: Props) {
         setClientErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
     const validateStep2 = (): boolean => {
         const newErrors: Partial<Record<keyof PendudukFormData, string>> = {};
 
@@ -341,6 +348,31 @@ export default function WargaAddModal({ isOpen, onClose, authUser }: Props) {
                                             {agamaOptions.map((a) => (
                                                 <option key={a} value={a}>{a}</option>
                                             ))}
+                                        </select>
+                                    </Field>
+
+                                    <Field label="Status Keluarga" error={allErrors.status_keluarga} required>
+                                        <select
+                                            name="status_keluarga"
+                                            value={data.status_keluarga}
+                                            onChange={handleInputChange}
+                                            className={inputClass(allErrors.status_keluarga)}
+                                        >
+                                            <option value="kepala_keluarga">Kepala Keluarga</option>
+                                            <option value="istri">Istri</option>
+                                            <option value="anak">Anak</option>
+                                        </select>
+                                    </Field>
+
+                                    <Field label="Status Kepemilikan" error={allErrors.status_kepemilikan} required>
+                                        <select
+                                            name="status_kepemilikan"
+                                            value={data.status_kepemilikan}
+                                            onChange={handleInputChange}
+                                            className={inputClass(allErrors.status_kepemilikan)}
+                                        >
+                                            <option value="sewa">Sewa</option>
+                                            <option value="milik_sendiri">Milik Sendiri</option>
                                         </select>
                                     </Field>
 

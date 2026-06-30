@@ -30,6 +30,8 @@ class PendataanController extends Controller
                 'email'        => $user->email,
                 'no_kk'        => $user->no_kk,
             ],
+            'statusKeluargaOptions' => Warga::STATUS_KELUARGA,
+            'statusKepemilikanOptions' => Warga::STATUS_KEPEMILIKAN,
         ]);
     }
 
@@ -42,6 +44,8 @@ class PendataanController extends Controller
                 'tanggal_lahir'  => 'required|date',
                 'jenis_kelamin'  => 'required|in:Laki-laki,Perempuan',
                 'agama'          => 'required|string',
+                'status_keluarga'         => 'required|in:kepala_keluarga,istri,anak',
+                'status_kepemilikan'         => 'required|in:sewa,milik_sendiri',
                 'email'          => 'required|email|unique:wargas,email',
                 'nomor_telepon'  => 'required|string|regex:/^08\d{8,11}$/',
                 'alamat_lengkap' => 'required|string',
@@ -76,6 +80,8 @@ class PendataanController extends Controller
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'agama' => 'required|string|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Lainnya',
             'email' => 'required|email|unique:wargas,email,' . $id . '|unique:users,email,' . ($warga->user_id ?? 0),
+            'status'         => 'required|in:kepala_keluarga,istri,anak',
+            'status_kepemilikan'         => 'required|in:sewa,milik_sendiri',
             'nomor_telepon' => 'required|string|regex:/^08[0-9]{8,11}$/',
             'alamat_lengkap' => 'required|string',
             'rt' => 'required|string|max:3',
@@ -131,6 +137,8 @@ class PendataanController extends Controller
             $warga->jenis_kelamin = $validated['jenis_kelamin'];
             $warga->agama = $validated['agama'];
             $warga->email = $validated['email'];
+            $warga->status_keluarga = $validated['status_keluarga'];
+            $warga->status_kepemilikan = $validated['status_kepemilikan'];
             $warga->nomor_telepon = $validated['nomor_telepon'];
             $warga->alamat_lengkap = $validated['alamat_lengkap'];
             $warga->rt = $validated['rt'];

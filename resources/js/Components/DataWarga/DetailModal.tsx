@@ -8,6 +8,8 @@ export interface PendudukDetail {
     nik: string;
     tanggal_lahir: string;
     jenis_kelamin: "Laki-laki" | "Perempuan";
+    status_keluarga: "kepala_keluarga" | "istri" | "anak";
+    status_kepemilikan: "sewa" | "milik_sendiri";
     agama: string;
     email: string;
     nomor_telepon: string;
@@ -108,6 +110,8 @@ export default function WargaDetailModal({ isOpen, onClose, data }: Props) {
                                         <DetailRow label="Tanggal Lahir" value={formatDate(data.tanggal_lahir)} />
                                         <DetailRow label="Jenis Kelamin" value={data.jenis_kelamin} />
                                         <DetailRow label="Agama" value={data.agama} />
+                                        <DetailRow label="Status Keluarga" value={data.status_keluarga} />
+                                        <DetailRow label="Status Kepemilikan" value={data.status_kepemilikan} />
                                     </div>
                                 </Section>
 

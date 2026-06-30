@@ -8,6 +8,8 @@ export interface PendudukEditFormData {
     tanggal_lahir: string;
     jenis_kelamin: "Laki-laki" | "Perempuan";
     agama: string;
+    status_keluarga: "kepala_keluarga" | "istri" | "anak";
+    status_kepemilikan: "sewa" | "milik_sendiri";
     email: string;
     nomor_telepon: string;
     alamat_lengkap: string;
@@ -28,6 +30,8 @@ interface WargaData {
     tanggal_lahir: string;
     jenis_kelamin: "Laki-laki" | "Perempuan";
     agama: string;
+    status_keluarga: "kepala_keluarga" | "istri" | "anak";
+    status_kepemilikan: "sewa" | "milik_sendiri";
     email: string;
     nomor_telepon: string;
     alamat_lengkap: string;
@@ -67,6 +71,8 @@ export default function WargaEditModal({ isOpen, onClose, wargaData, authUser }:
         tanggal_lahir: wargaData.tanggal_lahir || "",
         jenis_kelamin: wargaData.jenis_kelamin || "Laki-laki",
         agama: wargaData.agama || "Islam",
+        status_keluarga: wargaData.status_keluarga || "kepala_keluarga",
+        status_kepemilikan: wargaData.status_kepemilikan || "sewa",
         email: wargaData.email || "",
         nomor_telepon: wargaData.nomor_telepon || "",
         alamat_lengkap: wargaData.alamat_lengkap || "",
@@ -78,7 +84,6 @@ export default function WargaEditModal({ isOpen, onClose, wargaData, authUser }:
         existing_file_kk: wargaData.file_kk,
         existing_file_ktp: wargaData.file_ktp,
     });
-
     // Reset form when modal opens with new data
     useEffect(() => {
         if (isOpen && wargaData) {
@@ -95,6 +100,8 @@ export default function WargaEditModal({ isOpen, onClose, wargaData, authUser }:
                 tanggal_lahir: wargaData.tanggal_lahir || "",
                 jenis_kelamin: wargaData.jenis_kelamin || "Laki-laki",
                 agama: wargaData.agama || "Islam",
+                status_keluarga: wargaData.status_keluarga || "kepala_keluarga",
+                status_kepemilikan: wargaData.status_kepemilikan || "sewa",
                 email: wargaData.email || "",
                 nomor_telepon: wargaData.nomor_telepon || "",
                 alamat_lengkap: wargaData.alamat_lengkap || "",
@@ -127,6 +134,11 @@ export default function WargaEditModal({ isOpen, onClose, wargaData, authUser }:
 
         if (!data.tanggal_lahir)
             newErrors.tanggal_lahir = "Tanggal lahir wajib diisi";
+        if (!data.status_keluarga)
+            newErrors.status_keluarga = "Status keluarga wajib dipilih";
+
+        if (!data.status_kepemilikan)
+            newErrors.status_kepemilikan = "Status kepemilikan wajib dipilih";
 
         if (!data.email?.trim())
             newErrors.email = "Email wajib diisi";
@@ -428,6 +440,31 @@ export default function WargaEditModal({ isOpen, onClose, wargaData, authUser }:
                                             {agamaOptions.map((a) => (
                                                 <option key={a} value={a}>{a}</option>
                                             ))}
+                                        </select>
+                                    </Field>
+
+                                    <Field label="Status Keluarga" error={allErrors.status_keluarga} required>
+                                        <select
+                                            name="status_keluarga"
+                                            value={data.status_keluarga}
+                                            onChange={handleInputChange}
+                                            className={inputClass(allErrors.status_keluarga)}
+                                        >
+                                            <option value="kepala_keluarga">Kepala Keluarga</option>
+                                            <option value="istri">Istri</option>
+                                            <option value="anak">Anak</option>
+                                        </select>
+                                    </Field>
+
+                                    <Field label="Status Kepemilikan" error={allErrors.status_kepemilikan} required>
+                                        <select
+                                            name="status_kepemilikan"
+                                            value={data.status_kepemilikan}
+                                            onChange={handleInputChange}
+                                            className={inputClass(allErrors.status_kepemilikan)}
+                                        >
+                                            <option value="sewa">Sewa</option>
+                                            <option value="milik_sendiri">Milik Sendiri</option>
                                         </select>
                                     </Field>
 

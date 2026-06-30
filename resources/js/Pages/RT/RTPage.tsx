@@ -98,8 +98,8 @@ interface DashboardStats {
 }
 
 const quickActions = [
-    { href: '/pengajuan', icon: Clock, color: 'yellow', label: 'Verifikasi', sub: 'Pengajuan' },
-    { href: '/warga', icon: Users, color: 'green', label: 'Data Warga', sub: 'Kelola' },
+    { href: '/rt/verifikasi-surat', icon: Clock, color: 'yellow', label: 'Verifikasi', sub: 'Pengajuan' },
+    { href: '/rt/data-warga', icon: Users, color: 'green', label: 'Data Warga', sub: 'Kelola' },
 ] as const;
 
 const colorClasses: Record<string, { bg: string; icon: string }> = {

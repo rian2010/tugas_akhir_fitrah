@@ -68,8 +68,12 @@ export default function DataWarga({ kkList }: Props) {
         );
         const totalPerempuan = totalWarga - totalLaki;
         const rwCount = new Set(kkList.map(kk => kk.rw)).size;
+        const totalSewa = kkList.reduce((sum, kk) =>
+            sum + kk.anggota.filter(a => a.status_kepemilikan === 'sewa').length, 0
+        );
+        const totalMilikSendiri = totalWarga - totalSewa;
 
-        return { totalKK, totalWarga, totalLaki, totalPerempuan, rwCount };
+        return { totalKK, totalWarga, totalLaki, totalPerempuan, rwCount, totalSewa, totalMilikSendiri };
     }, [kkList]);
 
     // ── Unique RW list ────────────────────────────────────────────────────────
@@ -163,7 +167,7 @@ export default function DataWarga({ kkList }: Props) {
                 <div className="py-8">
                     <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
                         {/* ── Stats Cards ── */}
-                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-blue-50 rounded-lg">
@@ -220,20 +224,6 @@ export default function DataWarga({ kkList }: Props) {
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-yellow-50 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-medium">Jumlah RW</p>
-                                        <p className="text-xl font-bold text-gray-900">{stats.rwCount}</p>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         {/* ── Main Content Card ── */}
@@ -254,29 +244,6 @@ export default function DataWarga({ kkList }: Props) {
                                                 className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white transition-colors"
                                             />
                                         </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={filterRW}
-                                            onChange={handleFilterRW}
-                                            className="px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white transition-colors"
-                                        >
-                                            <option value="">Semua RW</option>
-                                            {rwList.map((rw) => (
-                                                <option key={rw} value={rw}>RW {rw}</option>
-                                            ))}
-                                        </select>
-                                        {hasActiveFilters && (
-                                            <button
-                                                onClick={clearFilters}
-                                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                                Reset Filter
-                                            </button>
-                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -340,67 +307,73 @@ export default function DataWarga({ kkList }: Props) {
                                                 <p className="text-gray-500">Tidak ada data yang ditemukan</p>
                                             </div>
                                         ) : (
-                                            paginated.map((kk) => (
-                                                <div key={kk.noKK} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all hover:border-indigo-200 group">
-                                                    <div className="flex items-start justify-between mb-4">
-                                                        <div>
-                                                            <p className="text-xs text-gray-500 font-mono">No. KK</p>
-                                                            <p className="text-sm font-semibold text-gray-900">{kk.noKK}</p>
-                                                        </div>
-                                                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold">
-                                                            {kk.anggota.length}
-                                                        </span>
-                                                    </div>
+                                            paginated.map((kk) => {
+                                                const kepalaKeluarga = kk.anggota.find(
+                                                    (a) => a.status_keluarga === "kepala_keluarga"
+                                                );
 
-                                                    {kk.anggota[0] && (
-                                                        <div className="mb-3">
-                                                            <p className="text-xs text-gray-500">Kepala Keluarga</p>
-                                                            <p className="text-sm font-medium text-gray-900">{kk.anggota[0].nama_lengkap}</p>
+                                                return (
+                                                    <div key={kk.noKK} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all hover:border-indigo-200 group">
+                                                        <div className="flex items-start justify-between mb-4">
+                                                            <div>
+                                                                <p className="text-xs text-gray-500 font-mono">No. KK</p>
+                                                                <p className="text-sm font-semibold text-gray-900">{kk.noKK}</p>
+                                                            </div>
+                                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold">
+                                                                {kk.anggota.length}
+                                                            </span>
                                                         </div>
-                                                    )}
 
-                                                    <div className="space-y-1 mb-4">
-                                                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                            </svg>
-                                                            <span className="truncate">{kk.alamat}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                                                            <span>RT {kk.rt}</span>
-                                                            <span>RW {kk.rw}</span>
-                                                        </div>
-                                                    </div>
+                                                        {kepalaKeluarga && (
+                                                            <div className="mb-3">
+                                                                <p className="text-xs text-gray-500">Kepala Keluarga</p>
+                                                                <p className="text-sm font-medium text-gray-900">{kepalaKeluarga.nama_lengkap}</p>
+                                                            </div>
+                                                        )}
 
-                                                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                                        <button
-                                                            onClick={() => handleKKDetail(kk)}
-                                                            className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
-                                                        >
-                                                            Lihat Detail
-                                                        </button>
-                                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <div className="space-y-1 mb-4">
+                                                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                                </svg>
+                                                                <span className="truncate">{kk.alamat}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                                                                <span>RT {kk.rt}</span>
+                                                                <span>RW {kk.rw}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                                             <button
                                                                 onClick={() => handleKKDetail(kk)}
-                                                                className="p-1.5 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                                                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
                                                             >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                </svg>
+                                                                Lihat Detail
                                                             </button>
-                                                            <button
-                                                                onClick={() => handleDeleteClick(kk)}
-                                                                className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
-                                                            </button>
+                                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button
+                                                                    onClick={() => handleKKDetail(kk)}
+                                                                    className="p-1.5 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                    </svg>
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDeleteClick(kk)}
+                                                                    className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))
+                                                );
+                                            })
                                         )}
                                     </div>
                                 </div>

@@ -25,13 +25,13 @@ export default function LetterTypeCard({
             </svg>;
         }
 
-        if (title.includes("SKCK")) {
+        if (title.includes("SKTM")) {
             return <svg className={`${baseClass} text-purple-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M12 2a10 10 0 00-7 3c0 6 4 10 7 11 3-1 7-5 7-11a10 10 0 00-7-3z" />
             </svg>;
         }
 
-        if (title.includes("Keluarga")) {
+        if (title.includes("Nikah")) {
             return <svg className={`${baseClass} text-orange-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 14a4 4 0 10-8 0m-4 6v-1a4 4 0 014-4h8a4 4 0 014 4v1" />
             </svg>;
