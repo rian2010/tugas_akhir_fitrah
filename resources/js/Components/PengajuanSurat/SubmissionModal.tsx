@@ -10,7 +10,7 @@ interface SubmissionModalProps {
     wargas: any[];                              // add
     onSelectWarga: (warga: any) => void;
     onClose: () => void;
-    onSubmit: (data: { purpose: string; additionalInfo: string; notes: string }) => void;
+    onSubmit: (data: { purpose: string; additionalInfo: string; notes: string; wargaId: number }) => void;
 }
 
 export default function SubmissionModal({
@@ -46,7 +46,6 @@ export default function SubmissionModal({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Check if warga data exists
         if (!wargaData) {
             alert("Data penduduk tidak ditemukan. Silakan lengkapi data diri Anda terlebih dahulu.");
             return;
@@ -59,7 +58,12 @@ export default function SubmissionModal({
 
         setIsSubmitting(true);
         setTimeout(() => {
-            onSubmit({ purpose, additionalInfo, notes });
+            onSubmit({
+                purpose,
+                additionalInfo,
+                notes,
+                wargaId: wargaData.id, // include the currently selected warga's id
+            });
             setIsSubmitting(false);
         }, 1000);
     };

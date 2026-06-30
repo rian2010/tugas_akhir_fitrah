@@ -162,8 +162,6 @@ export default function DataWarga({ kkList }: Props) {
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="py-8">
                     <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
-
-
                         {/* ── Stats Cards ── */}
                         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">

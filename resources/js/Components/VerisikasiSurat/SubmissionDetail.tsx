@@ -175,14 +175,14 @@ const SubmissionDetail: React.FC<SubmissionDetailProps> = ({
                 {submission.status === 'Disetujui' && (
                     <div className="mt-4 p-3 bg-emerald-50 rounded-lg flex items-center gap-2 text-emerald-700 text-sm">
                         <CheckCircle className="w-4 h-4" />
-                        <span>Pengajuan ini telah disetujui. Surat akan segera diproses.</span>
+                        <span>Pengajuan ini telah disetujui.</span>
                     </div>
                 )}
 
                 {submission.status === 'Ditolak' && (
                     <div className="mt-4 p-3 bg-red-50 rounded-lg flex items-center gap-2 text-red-700 text-sm">
                         <XCircle className="w-4 h-4" />
-                        <span>Pengajuan ini ditolak. Silakan hubungi admin untuk informasi lebih lanjut.</span>
+                        <span>Pengajuan ini ditolak. Silakan mengajukan Surat Lagi.</span>
                     </div>
                 )}
 

@@ -65,13 +65,17 @@ class SuratController extends Controller
             'purpose' => 'required|string|min:10',
             'additional_info' => 'nullable|string',
             'notes' => 'nullable|string',
+            'warga_id' => 'required|integer',
         ]);
 
-        $warga = Warga::where('user_id', Auth::id())->first();
+        // Make sure the selected warga actually belongs to this user
+        $warga = Warga::where('user_id', Auth::id())
+            ->where('id', $request->warga_id)
+            ->first();
 
         if (!$warga) {
             return response()->json([
-                'message' => 'Data penduduk tidak ditemukan. Silakan lengkapi profil Anda terlebih dahulu.'
+                'message' => 'Data penduduk tidak ditemukan atau tidak valid.'
             ], 400);
         }
 
@@ -84,8 +88,7 @@ class SuratController extends Controller
             'warga_id' => $warga->id,
             'status' => 'pending',
             'submission_number' => 'SURAT-' . date('Ymd') . '-' . rand(1000, 9999),
-            // Don't use json_encode() - Laravel will handle it automatically
-            'warga_data' => [  // Just pass array, Laravel will JSON encode
+            'warga_data' => [
                 'nama_lengkap' => $warga->nama_lengkap,
                 'nik' => $warga->nik,
                 'tempat_lahir' => $warga->tempat_lahir,
